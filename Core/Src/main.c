@@ -124,7 +124,7 @@ int main(void)
 	  {
 	      // Button not pressed — blink normally
 	      HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	      HAL_Delay(500);
+	      HAL_Delay(100);
 	  }
     /* USER CODE BEGIN 3 */
   }
