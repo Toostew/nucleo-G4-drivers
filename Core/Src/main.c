@@ -113,17 +113,47 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   //define the port to use by finding it's register location in memory
-#define PORT_PC9 (*((volatile uint32_t *)0x48000818)) //
-#define PORT_PB1 (*((volatile uint32_t *)0x48000410))
-  while (1)
-  {
+#define PORTC_OUT (*((volatile uint32_t *)0x48000818)) //this is the hardcoded address for Port Output for group C
+#define PORTB_IN (*((volatile uint32_t *)0x48000410)) //this is the hardcoded address for Port input for group B
+int count = 0;
+uint8_t last_state = 0; // Keep track of what the button was doing last time
 
-	  if(PORT_PB1 & (1 << 1)){
-		  PORT_PC9 = (1 << 9);
-	  } else {
-		  PORT_PC9 = (1 << (9 + 16));
-	  }
 
+  //configure the ports; set them as GP input or output
+
+
+
+  while (1) {
+      uint8_t current_state = (PORTB_IN & (1 << 1)) ? 1 : 0;
+
+      //edge detection: we are trying to detect rising edge which is 0 -> 1
+      if (current_state == 1 && last_state == 0) {
+          count++;
+          HAL_Delay(100); // Debounce: Ignore the "bounces" for 50ms
+      }
+
+      last_state = current_state; // Update the memory for the next loop
+
+      //LED logic
+      if (count % 2 == 0) {
+          PORTC_OUT = (1 << 9); //alter the bit using a bitmask, specifically targeting the 9th bit from right
+
+          //GPIOC->BSRR = (1 << 9); //this is how we do it using the HAL
+      } else {
+          //PORTC_OUT = (1 << (9 + 16));
+
+    	  //this is the HAL implementation
+    	  //the HAL already includes the address calculation by slowly adding up all the relevant base addresses with relevant offsets
+          GPIOC->BSRR = (1 << (9 + 16));
+          /*in short, GPIOC if defined as using the address for GPIOC_BASE, itself an altered address for AHB2PERIPH_BASE, and so on
+           * GPIOC is defined and is type casted as a (GPIO_TypeDef *), which is basically a "pointer of struct GPIO_TypeDef "
+           * a feature of structs is that it's elements are always stored in order within memory. so if each element is 4 bytes,
+           * you can get whatever element you want by skipping the memory by AxB bytes. where A is the size, B is the slot
+           * BSRR is an element within the GPIO_TypeDef struct, it is the 7th element (index 6 since we count from 0)
+           * so, to get the location of memory of BSRR for GPIOC, logically it would be GPIOC address + BSRR location,
+           * which is like GPIOC + 6(4) bytes = 0x48000800 + 0x18.
+           * that's how it works! it is a fundamental feature of C using pointers and structs. */
+      }
   }
   /* USER CODE END 3 */
 }
