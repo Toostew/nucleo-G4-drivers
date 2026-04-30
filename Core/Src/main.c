@@ -48,8 +48,7 @@ COM_InitTypeDef BspCOMInit;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -113,6 +112,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   //define the port to use by finding it's register location in memory
+  //why use define? why not a variable? among the many reasons, is that variables will live in memory,
+  //#define is pure text substitution. During preprocessing anything that is defined is literally replaced. No RAM needed.
 #define PORTC_OUT (*((volatile uint32_t *)0x48000818)) //this is the hardcoded address for Port Output for group C
 #define PORTB_IN (*((volatile uint32_t *)0x48000410)) //this is the hardcoded address for Port input for group B
 int count = 0;
@@ -122,7 +123,7 @@ uint8_t last_state = 0; // Keep track of what the button was doing last time
   //configure the ports; set them as GP input or output
 
 
-
+	/*
   while (1) {
       uint8_t current_state = (PORTB_IN & (1 << 1)) ? 1 : 0;
 
@@ -145,16 +146,37 @@ uint8_t last_state = 0; // Keep track of what the button was doing last time
     	  //this is the HAL implementation
     	  //the HAL already includes the address calculation by slowly adding up all the relevant base addresses with relevant offsets
           GPIOC->BSRR = (1 << (9 + 16));
-          /*in short, GPIOC if defined as using the address for GPIOC_BASE, itself an altered address for AHB2PERIPH_BASE, and so on
+          in short, GPIOC if defined as using the address for GPIOC_BASE, itself an altered address for AHB2PERIPH_BASE, and so on
            * GPIOC is defined and is type casted as a (GPIO_TypeDef *), which is basically a "pointer of struct GPIO_TypeDef "
            * a feature of structs is that it's elements are always stored in order within memory. so if each element is 4 bytes,
            * you can get whatever element you want by skipping the memory by AxB bytes. where A is the size, B is the slot
            * BSRR is an element within the GPIO_TypeDef struct, it is the 7th element (index 6 since we count from 0)
            * so, to get the location of memory of BSRR for GPIOC, logically it would be GPIOC address + BSRR location,
            * which is like GPIOC + 6(4) bytes = 0x48000800 + 0x18.
-           * that's how it works! it is a fundamental feature of C using pointers and structs. */
-      }
-  }
+           * that's how it works! it is a fundamental feature of C using pointers and structs.
+      	  }
+  	  } */
+	clockTest();
+	while(1){
+		#define GPIOC_ODR 	 (*((volatile uint32_t *)0x48000814))
+
+
+		uint8_t current_state = (PORTB_IN & (1 << 1)) ? 1 : 0;
+
+		if (current_state == 1 && last_state == 0) {
+		    count++;
+		    HAL_Delay(100); // Debounce: Ignore the "bounces" for 50ms
+		}
+		last_state = current_state;
+
+		//this logic is for the button, not seperated because fuck you
+		if(count % 2 == 0){
+			GPIOC_ODR |= (3 << 9); //shift 11 9 bits left, will enable the 9th and 8th bit
+		} else {
+			GPIOC_ODR |= (3 << (9+16)); //shift 11 25 bits left, will enable the 25th and 24th bit
+		}
+	}
+
   /* USER CODE END 3 */
 }
 
@@ -162,6 +184,14 @@ uint8_t last_state = 0; // Keep track of what the button was doing last time
   * @brief System Clock Configuration
   * @retval None
   */
+
+
+
+
+
+
+
+// this is the system clock config, aka config how fast the system can think
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -174,10 +204,14 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+
+
+  //this is using the HAL, which involves preseting a struct and then giving the struct as a parameter
+
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI; //use the HSI oscillator
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON; //turn on HSI
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON; //Turn on PLL
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV4;
   RCC_OscInitStruct.PLL.PLLN = 85;
@@ -238,6 +272,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PC8 */
+    GPIO_InitStruct.Pin = GPIO_PIN_8;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */
@@ -258,6 +299,7 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+
   }
   /* USER CODE END Error_Handler_Debug */
 }

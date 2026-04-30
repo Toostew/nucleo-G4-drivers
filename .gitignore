@@ -1,0 +1,9 @@
+.settings
+.Debug
+STM32G474RETX_FLASH.Id
+STM32G474RETX_RAM.Id
+blink Debug.launch
+.project
+blink.ioc
+.mxproject
+.idea
