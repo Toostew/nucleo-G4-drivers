@@ -156,12 +156,27 @@ uint8_t last_state = 0; // Keep track of what the button was doing last time
            * that's how it works! it is a fundamental feature of C using pointers and structs.
       	  }
   	  } */
-	clockTest();
-	while(1){
+
+		#define GPIOC_BASE_ADDR	(0x48000800UL)
 		#define GPIOC_ODR 	 (*((volatile uint32_t *) 0x48000814))
+		#define GPIOC_BSRR		(*((volatile uint32_t *)(GPIOC_BASE_ADDR + 0x18UL)))
 		#define TIM_2_BASE_ADDR		(*((volatile uint32_t *) 0x40000000)) //TIM2 base address
+		#define TIM_3_BASE_ADDR		(0x40000400UL)
+#define TIM3_CCR3     (*((volatile uint32_t *)(TIM_3_BASE_ADDR + 0x3CUL))) // Duty cycle for Ch3
+
+
+	clockTest();
+
+	PWM_Test();
+	TIM3_CCR3 = 100;
+	while(1){
+
 
 		uint8_t current_state = (PORTB_IN & (1 << 1)) ? 1 : 0;
+
+
+
+
 
 		if (current_state == 1 && last_state == 0) {
 		    count1++;
@@ -272,14 +287,15 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PC8 */
+  /*Configure GPIO pin : PC8
+   *
     GPIO_InitStruct.Pin = GPIO_PIN_8;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /* USER CODE BEGIN MX_GPIO_Init_2 */
+   USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */
 }

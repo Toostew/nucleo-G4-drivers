@@ -8,13 +8,15 @@
 #ifndef INC_DRIVEREX_H_
 #define INC_DRIVEREX_H_
 
+#include <stdint.h>
+
+
+void clockTest();
+void Opposite_Flash();
+void PWM_Test();
 
 
 #endif /* INC_DRIVEREX_H_ */
 
-#include "stm32g4xx_hal.h"
-#include "stm32g4xx_nucleo.h"
 
-void clockTest();
-void TIM2_IRQHandler();
-void Opposite_Flash();
+
