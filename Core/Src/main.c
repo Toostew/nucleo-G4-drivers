@@ -116,7 +116,7 @@ int main(void)
   //#define is pure text substitution. During preprocessing anything that is defined is literally replaced. No RAM needed.
 #define PORTC_OUT (*((volatile uint32_t *)0x48000818)) //this is the hardcoded address for Port Output for group C
 #define PORTB_IN (*((volatile uint32_t *)0x48000410)) //this is the hardcoded address for Port input for group B
-int count = 0;
+int count1 = 0;
 uint8_t last_state = 0; // Keep track of what the button was doing last time
 
 
@@ -158,22 +158,22 @@ uint8_t last_state = 0; // Keep track of what the button was doing last time
   	  } */
 	clockTest();
 	while(1){
-		#define GPIOC_ODR 	 (*((volatile uint32_t *)0x48000814))
-
+		#define GPIOC_ODR 	 (*((volatile uint32_t *) 0x48000814))
+		#define TIM_2_BASE_ADDR		(*((volatile uint32_t *) 0x40000000)) //TIM2 base address
 
 		uint8_t current_state = (PORTB_IN & (1 << 1)) ? 1 : 0;
 
 		if (current_state == 1 && last_state == 0) {
-		    count++;
+		    count1++;
 		    HAL_Delay(100); // Debounce: Ignore the "bounces" for 50ms
 		}
 		last_state = current_state;
 
 		//this logic is for the button, not seperated because fuck you
-		if(count % 2 == 0){
-			GPIOC_ODR |= (3 << 9); //shift 11 9 bits left, will enable the 9th and 8th bit
+		if(count1 % 2 == 0){
+			TIM_2_BASE_ADDR &= ~(1 << 0);
 		} else {
-			GPIOC_ODR |= (3 << (9+16)); //shift 11 25 bits left, will enable the 25th and 24th bit
+			TIM_2_BASE_ADDR |= (1 << 0);
 		}
 	}
 
