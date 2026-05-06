@@ -111,12 +111,14 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uartPinConfig();
+
   while (1)
   {
-
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
+	  for(int i = 0; i < 99999; i++){
+		  HAL_Delay(1000);
+		  UARTSendChar('b');
+	  }
   }
   /* USER CODE END 3 */
 }

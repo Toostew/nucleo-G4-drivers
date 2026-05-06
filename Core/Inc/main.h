@@ -28,7 +28,8 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32g4xx_hal.h"
-
+#include "driverEx.h"
+#include "uartEx.h"
 #include "stm32g4xx_nucleo.h"
 #include <stdio.h>
 

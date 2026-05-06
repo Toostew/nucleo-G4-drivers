@@ -26,10 +26,10 @@ Core/Src/stm32g4xx_it.o: ../Core/Src/stm32g4xx_it.c ../Core/Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h \
+ ../Core/Inc/driverEx.h ../Core/Inc/uartEx.h \
  ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo.h \
  ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo_errno.h \
- ../Core/Inc/stm32g4xx_nucleo_conf.h ../Core/Inc/driverEx.h \
- ../Core/Inc/stm32g4xx_it.h
+ ../Core/Inc/stm32g4xx_nucleo_conf.h ../Core/Inc/stm32g4xx_it.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../Core/Inc/stm32g4xx_hal_conf.h:
@@ -58,8 +58,9 @@ Core/Src/stm32g4xx_it.o: ../Core/Src/stm32g4xx_it.c ../Core/Inc/main.h \
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h:
+../Core/Inc/driverEx.h:
+../Core/Inc/uartEx.h:
 ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo.h:
 ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo_errno.h:
 ../Core/Inc/stm32g4xx_nucleo_conf.h:
-../Core/Inc/driverEx.h:
 ../Core/Inc/stm32g4xx_it.h:

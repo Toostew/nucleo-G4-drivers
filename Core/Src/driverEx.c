@@ -104,7 +104,7 @@ void PWM_Test(){
 
 	#define RCC_AHB2ENR (*((volatile uint32_t *)(RCC_BASE_ADDR + 0x4CUL)))
 
-	//enable AHB2 bus
+	//enable AHB2 bus, reset clock and control (RCC)
 	RCC_AHB2ENR |= (1 << 2);
 
 	//STEP 1: enable the clocks so that these timer registers can count. Tim3 (the timer register we wish to use) is under APB1 bus
@@ -115,7 +115,7 @@ void PWM_Test(){
 
 	    //at this point, sysclk has been scaled down from 170,000,000 to 10,000. We need to scale it down even more (goal is 1)
 	    //STEP 3: Auto Reload Register, if the timer reaches this value, it automatically resets to start value. also x + 1
-	TIM3_ARR = 999 // default is x + 1
+	TIM3_ARR = 999; // default is x + 1
 
 
 	TIM3_CCR3 = 499; //set the Capture Control Register; CCR. in PWM, any value below this is considered HIGH, equal and above is considered HIGH
