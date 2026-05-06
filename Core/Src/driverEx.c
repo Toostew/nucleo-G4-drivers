@@ -115,10 +115,10 @@ void PWM_Test(){
 
 	    //at this point, sysclk has been scaled down from 170,000,000 to 10,000. We need to scale it down even more (goal is 1)
 	    //STEP 3: Auto Reload Register, if the timer reaches this value, it automatically resets to start value. also x + 1
-	TIM3_ARR = 999; // default is x + 1
+	TIM3_ARR = 999 // default is x + 1
 
 
-	TIM3_CCR3 = 4999;
+	TIM3_CCR3 = 499; //set the Capture Control Register; CCR. in PWM, any value below this is considered HIGH, equal and above is considered HIGH
 
 
 	TIM3_CCMR2 |= (6 << 4); //set the OC1M bit, bit 4 (we actually want 0110)

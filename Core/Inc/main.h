@@ -31,8 +31,6 @@ extern "C" {
 
 #include "stm32g4xx_nucleo.h"
 #include <stdio.h>
-#include <driverEx.h>
-
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -56,10 +54,7 @@ extern "C" {
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
-void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-void TIM2_IRQHandler(void);
-void clockTest(void);
+
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */
