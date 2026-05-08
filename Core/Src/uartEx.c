@@ -27,7 +27,7 @@
 #define USART_BRR	(*((volatile uint32_t *)(APB2_USART1 + 0x0CUL))) //Baud Rate Register
 #define USART_CR2	(*((volatile uint32_t *)(APB2_USART1 + 0x04UL))) //set stop bit
 
-//addresses for ISR (Interrupt service register, where flags are kept), and TDR (Transmit Data Register, for transmitting data)
+//addresses for ISR (Interrupt status register, where flags are kept), and TDR (Transmit Data Register, for transmitting data)
 #define USART_ISR    (*((volatile uint32_t *)(APB2_USART1 + 0x1CUL)))
 #define USART_TDR    (*((volatile uint32_t *)(APB2_USART1 + 0x28UL))) //max size is 1 byte (8 bits, 256 combinations)
 

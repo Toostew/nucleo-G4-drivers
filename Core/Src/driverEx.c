@@ -110,7 +110,7 @@ void PWM_Test(){
 	//STEP 1: enable the clocks so that these timer registers can count. Tim3 (the timer register we wish to use) is under APB1 bus
 	RCC_APB1ENR1 |= (1 << 1);
 
-	    //STEP 2: prescale, this number will divide the sysclock so that it'll be slower. Note that by default it's x + 1
+	//STEP 2: prescale, this number will divide the sysclock so that it'll be slower. Note that by default it's x + 1
 	TIM3_PRESCALER = 169; // by the default the value is x + 1
 
 	    //at this point, sysclk has been scaled down from 170,000,000 to 10,000. We need to scale it down even more (goal is 1)
