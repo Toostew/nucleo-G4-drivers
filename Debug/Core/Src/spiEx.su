@@ -1,0 +1,10 @@
+../Core/Src/spiEx.c:40:6:spiPinConfig	8	static
+../Core/Src/spiEx.c:78:6:spiPinConfig_Silent	8	static
+../Core/Src/spiEx.c:111:6:SPIPinReset	4	static
+../Core/Src/spiEx.c:122:6:SPITest	16	static
+../Core/Src/spiEx.c:148:5:checkBusy	4	static
+../Core/Src/spiEx.c:159:5:checkTransmitBufferEmpty	4	static
+../Core/Src/spiEx.c:168:5:checkReceiveBufferEmpty	4	static
+../Core/Src/spiEx.c:178:6:SetCSGPIO	16	static
+../Core/Src/spiEx.c:189:6:powerBME	16	static
+../Core/Src/spiEx.c:201:9:getID	16	static

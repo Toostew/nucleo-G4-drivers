@@ -18,7 +18,15 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "uartEx.h"
+
+
+#define GPIOB_BASE_ADDR		0x48000400
+#define GPIOB_BSRR			(*((volatile uint32_t *)(GPIOB_BASE_ADDR + 0x18))) //Bit Set reset
+
+#define SPI2_BASE_ADDR 		0x40003800 //base address for SPI2 related registers
+#define	SPI2_SR				(*((volatile uint32_t *)(SPI2_BASE_ADDR + 0x08))) //address for Status register, flags found here
+#define	SPI2_DR				(*((volatile uint32_t *)(SPI2_BASE_ADDR + 0x0C))) //address for Data register, data kept here
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -110,16 +118,19 @@ int main(void)
     Error_Handler();
   }
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  uartPinConfig();
-  while (1)
-  {
-	 for(int i = 0; i < 9999; i++){
-		 HAL_Delay(1000);
-		 UARTSendChar('b');
-	 }
-  }
+  spiPinConfig_Silent(); // Use the one with the PB14 Pull-up
+
+      // We don't need powerBME() anymore since it's on a 3.3V pin
+      SetCSGPIO(1);
+      HAL_Delay(100);
+
+      while(1) {
+          // Clear errors before every attempt
+          if (SPI2_SR & (1 << 6)) { (void)SPI2_SR; (void)SPI2_DR; }
+
+          uint8_t id = getID();
+          HAL_Delay(500);
+      }
   /* USER CODE END 3 */
 }
 

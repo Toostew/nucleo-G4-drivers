@@ -93,3 +93,22 @@ void UARTSendString(char* str) {
     }
 }
 
+void print_hex(uint8_t value) {
+    char hex_chars[] = "0123456789ABCDEF";
+
+    // Send "0x" prefix
+    UARTSendChar('0');
+    UARTSendChar('x');
+
+
+    // Send high nibble (e.g., the '6' in 0x60)
+    UARTSendChar(hex_chars[(value >> 4) & 0x0F]);
+
+    // Send low nibble (e.g., the '0' in 0x60)
+    UARTSendChar(hex_chars[value & 0x0F]);
+
+    // New line for readability
+    UARTSendChar('\r');
+    UARTSendChar('\n');
+}
+

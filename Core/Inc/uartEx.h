@@ -15,5 +15,6 @@
 void uartPinConfig();
 void UARTSendChar(char c);
 void UARTSendString(char* str); //remember a string is just an array of chars, we could just store the first char in the array
+void print_hex(uint8_t value);
 
 #endif /* INC_UARTEX_H_ */
