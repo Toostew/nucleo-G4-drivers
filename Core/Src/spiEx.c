@@ -6,6 +6,8 @@
  */
 
 #include "spiEx.h"
+#include "stm32g4xx_hal.h"
+
 
 //BASE ADDRESSES
 #define SPI2_BASE_ADDR 		0x40003800 //base address for SPI2 related registers
@@ -48,6 +50,9 @@ void spiPinConfig(){
     // 3. Set Modes: 11,12=Output(01), 13/14/15=AF(10)
     GPIOB_MODER |=  (1 << 22) | (1 << 24) | (2 << 26) | (2 << 28) | (2 << 30);
 
+    SetCSGPIO(1); //turn it to high so that it knows it's not selected
+
+
     // 2. Setup PA5 (User LED) as Output
     GPIOA_MODER &= ~(3 << 10);
     GPIOA_MODER |=  (1 << 10);
@@ -56,7 +61,7 @@ void spiPinConfig(){
     GPIOB_AFRH &= ~((0xF << 20) | (0xF << 24) | (0xF << 28));
     GPIOB_AFRH |=  ((5 << 20) | (5 << 24) | (5 << 28));
 
-    GPIOB_OSPEEDR |= (3 << 26) | (3 << 28) | (3 << 30); //set speed to very high
+    GPIOB_OSPEEDR |= (2 << 26) | (2 << 28) | (2 << 30); //set speed to very high
 
     // 5. Atomic SPI Config: Avoids Mode Faults
     // Bit 9 (SSM), Bit 8 (SSI), Bit 2 (MSTR), Bits 5:3 (BR = f/256)
@@ -71,10 +76,9 @@ void spiPinConfig(){
     // 7. ENABLE SPI (Always last!)
     SPI2_CR1 |= (1 << 6);
 
-    // 8. Ensure CS starts HIGH
-    SetCSGPIO(1);
 }
 
+//deprecated, for debug
 void spiPinConfig_Silent() {
     // 1. Enable Clocks
     RCC_APB1ENR |= (1 << 14); // SPI2
@@ -118,7 +122,7 @@ void SPIPinReset(){
 
 }
 
-//test BME 280
+//test BME 280, deprecated
 void SPITest(){
 	// 1. Set PB14 (SDO/MISO) as a standard Output instead of SPI
 	GPIOB_MODER &= ~(3 << 28);
@@ -185,7 +189,7 @@ void SetCSGPIO(int mode){
 
 }
 
-//power on BME
+//power on BME; deprecated
 void powerBME(int mode){
 
 	if(mode >= 1){
@@ -198,29 +202,40 @@ void powerBME(int mode){
 
 
 //simple function to get the ID from the device
-uint8_t getID(){
+uint8_t getID(void) {
     uint8_t data = 0;
 
-    // 1. Force the lines to their "Idle" state before touching CS
-    // SCLK should be High, MOSI should be High (pull-up)
-    SetCSGPIO(1);
-    HAL_Delay(1); // Micro-delay to let voltages settle
+    // 1. START SPI TRANSACTION
+    // Pull PB12 (CS) LOW
+    GPIOB_BSRR = (1 << 28);
 
-    // 2. DROP CS
-    SetCSGPIO(0);
-    for(volatile int i=0; i<10; i++); // Tiny "Lead-time" delay
-
-    // 3. Perform the 8-bit Write/Read with strict casting
+    // 2. SEND ADDRESS (0xD0)
+    // Wait until the transmit buffer is empty and ready for a new byte
+    while(!checkTransmitBufferEmpty());
     *(volatile uint8_t *)&SPI2_DR = 0xD0;
-    while(!(SPI2_SR & (1 << 0))); // Wait for RXNE
-    (void)*(volatile uint8_t *)&SPI2_DR; // Clear garbage
 
-    // 4. Send dummy to get the ID
+    // Wait until the receive buffer has the shifted-in byte (garbage)
+    while(checkReceiveBufferEmpty());
+    (void)*(volatile uint8_t *)&SPI2_DR; // Clear garbage from RX FIFO
+
+    // 3. SEND DUMMY (0x00) TO CLOCK OUT DATA
+    // Wait for TXE again
+    while(!checkTransmitBufferEmpty());
     *(volatile uint8_t *)&SPI2_DR = 0x00;
-    while(!(SPI2_SR & (1 << 0)));
+
+    // Wait for the actual ID byte to arrive in RXNE
+    while(checkReceiveBufferEmpty());
     data = *(volatile uint8_t *)&SPI2_DR;
 
-    SetCSGPIO(1);
+    // 4. END TRANSACTION
+    // Critical: Wait for the Busy flag to clear so we don't
+    // pull CS High while the clock is still finishing the last bit.
+    while(checkBusy());
+
+    GPIOB_BSRR = (1 << 12); // CS High
+
+
+
     return data;
 }
 

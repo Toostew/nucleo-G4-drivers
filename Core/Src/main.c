@@ -118,18 +118,12 @@ int main(void)
     Error_Handler();
   }
 
-  spiPinConfig_Silent(); // Use the one with the PB14 Pull-up
-
-      // We don't need powerBME() anymore since it's on a 3.3V pin
-      SetCSGPIO(1);
-      HAL_Delay(100);
+  	  spiPinConfig();
+  	  HAL_Delay(3000);
+  	  uint8_t example = getID();
 
       while(1) {
-          // Clear errors before every attempt
-          if (SPI2_SR & (1 << 6)) { (void)SPI2_SR; (void)SPI2_DR; }
 
-          uint8_t id = getID();
-          HAL_Delay(500);
       }
   /* USER CODE END 3 */
 }
