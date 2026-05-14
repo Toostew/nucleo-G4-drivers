@@ -15,6 +15,7 @@
 
 #define RCC_APB1ENR 		(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x58UL)))	//for APB1 clock enable; for I2C1
 #define RCC_AHB2ENR			(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x4CUL)))	//for GPIOB
+#define RCC_CCIPR			(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x88UL)))	//for I2C1 clock source config
 
 #define I2C_CR1				(*((volatile uint32_t *)(I2C1_BASE_ADDR))) //CR1 has no offset
 #define I2C_CR2				(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x04UL)))
@@ -34,9 +35,20 @@
 //configuration function for I2C
 void I2C_Configuration(){
 
+	//clock config
+	//enable clocks
+	RCC_APB1ENR |= (1 << 21);
+	RCC_AHB2ENR |= (1 << 1);
+
+	//change source clock for I2C1 to use HSI, 16 MHZ. makes my life easier
+	RCC_CCIPR &= ~(3 << 12);
+	RCC_CCIPR |= (2 << 12); //select HSI for clock source, 16 MHz
+
+
 	//GPIOB config
 
 	//MODER setup, AF4; clear first
+	//NOTE: notice that we didnt put a dereference on the define, because of that we need to manually dereference here
 	*GPIOB_MODER &= ~(3 << 14);
 	*GPIOB_MODER &= ~(3 << 16);
 	*GPIOB_MODER |= (2 << 14);
@@ -46,6 +58,32 @@ void I2C_Configuration(){
 	GPIOB_OTYPER |= (1 << 7);
 	GPIOB_OTYPER |= (1 << 8);
 
+	//configure OSPEEDR
+	GPIOB_OSPEEDR &= ~(3 << 14);
+	GPIOB_OSPEEDR &= ~(3 << 16);
+	GPIOB_OSPEEDR |= (2 << 14);
+	GPIOB_OSPEEDR |= (2 << 16);
+
+	//PUPDR setup, set for pull up
+	GPIOB_PUPDR &= ~(3 << 14); //reset
+	GPIOB_PUPDR &= ~(3 << 16);
+	GPIOB_PUPDR |= (1 << 14); // Set to pull up
+	GPIOB_PUPDR	|= (1 << 16);
+
+	//AFR L and H setup (L for pin 7, H for pin 8)
+	GPIOB_AFRL	&= ~(15 << 28);
+	GPIOB_AFRL	|= (4 << 28); //pin 7
+	GPIOB_AFRH	&= ~(15 << 0);
+	GPIOB_AFRH	|= (4 << 0); //pin 8
+
+
+	//I2C Configuration
+	I2C_TIMINGR = 0x00000000; //reset values to default
+
+	I2C_TIMINGR |= ((0x3 << 28) | (0x13 << 0) | (0xF << 8) | (0x4 << 20) | (0x2 << 16));
+
+	//enable I2C
+	I2C_CR1 |= (1 << 0);
 
 }
 
