@@ -75,6 +75,26 @@ Discarded input sections
                 0x00000000       0x7c ./Core/Src/driverEx.o
  .text.PWM_Test
                 0x00000000       0xe0 ./Core/Src/driverEx.o
+ .group         0x00000000        0xc ./Core/Src/i2c.o
+ .text          0x00000000        0x0 ./Core/Src/i2c.o
+ .data          0x00000000        0x0 ./Core/Src/i2c.o
+ .bss           0x00000000        0x0 ./Core/Src/i2c.o
+ .text.I2C_Configuration
+                0x00000000        0xe ./Core/Src/i2c.o
+ .debug_info    0x00000000       0x3d ./Core/Src/i2c.o
+ .debug_abbrev  0x00000000       0x2d ./Core/Src/i2c.o
+ .debug_aranges
+                0x00000000       0x20 ./Core/Src/i2c.o
+ .debug_rnglists
+                0x00000000       0x13 ./Core/Src/i2c.o
+ .debug_macro   0x00000000       0x2f ./Core/Src/i2c.o
+ .debug_macro   0x00000000      0xade ./Core/Src/i2c.o
+ .debug_line    0x00000000       0x46 ./Core/Src/i2c.o
+ .debug_str     0x00000000     0x2f5a ./Core/Src/i2c.o
+ .comment       0x00000000       0x44 ./Core/Src/i2c.o
+ .debug_frame   0x00000000       0x2c ./Core/Src/i2c.o
+ .ARM.attributes
+                0x00000000       0x34 ./Core/Src/i2c.o
  .group         0x00000000        0xc ./Core/Src/main.o
  .group         0x00000000        0xc ./Core/Src/main.o
  .group         0x00000000        0xc ./Core/Src/main.o
@@ -3269,6 +3289,7 @@ LOAD D:/stm32/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-to
 LOAD D:/stm32/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.14.3.rel1.win32_1.0.100.202602081740/tools/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 LOAD D:/stm32/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.14.3.rel1.win32_1.0.100.202602081740/tools/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/crt0.o
 LOAD ./Core/Src/driverEx.o
+LOAD ./Core/Src/i2c.o
 LOAD ./Core/Src/main.o
 LOAD ./Core/Src/spiEx.o
 LOAD ./Core/Src/stm32g4xx_hal_msp.o
