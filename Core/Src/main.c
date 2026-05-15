@@ -114,6 +114,13 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uartPinConfig();
+   I2C_Configuration();
+   uint32_t data = pingSensorTest();
+   print_hex(data);
+
+   char mychars[] = "test";
+   UARTSendString(mychars);
   while (1)
   {
 

@@ -13,4 +13,14 @@
 #include "stm32g4xx_nucleo.h"
 #include <stdio.h>
 
+void I2C_Configuration();
+uint32_t pingSensorTest();
+int checkBusyRegister();
+int transferComplete();
+int stopFlagDetected();
+int nackFlagDetected();
+int rxNotEmpty();
+int txEmpty();
+int txisEmpty();
+
 #endif /* INC_I2C_H_ */
