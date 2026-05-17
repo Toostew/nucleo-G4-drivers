@@ -15,6 +15,9 @@
 
 void I2C_Configuration();
 uint32_t pingSensorTest();
+void toggleDisplay();
+void sendOLEDCommand(uint8_t cmd);
+void testDisplayOn();
 int checkBusyRegister();
 int transferComplete();
 int stopFlagDetected();

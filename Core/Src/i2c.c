@@ -150,6 +150,80 @@ uint32_t pingSensorTest(){
 }
 
 
+
+void toggleDisplay(){
+    // 1. Clear sticky event flags
+    I2C_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
+
+    // 2. Clear old CR2 configurations
+    I2C_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+    // 3. Set NBYTES = 5, Write Mode (0<<10), Address (0x3C << 1), and AUTOEND = 1 (1 << 25)
+    I2C_CR2 = (5 << 16) | (0 << 10) | (0x3C << 1) | (1 << 25);
+
+    // 4. Fire the START bit
+    I2C_CR2 |= (1 << 13);
+
+    // --- BYTE 1: Control Byte (0x00) ---
+    while(!txisEmpty()) { if(nackFlagDetected()) { goto handle_nack; } }
+    I2C_TXDR = 0x00;
+
+    // --- BYTE 2: Charge Pump Set (0x8D) ---
+    while(!txisEmpty()) { if(nackFlagDetected()) { goto handle_nack; } }
+    I2C_TXDR = 0x8D;
+
+    // --- BYTE 3: Enable Charge Pump (0x14) ---
+    while(!txisEmpty()) { if(nackFlagDetected()) { goto handle_nack; } }
+    I2C_TXDR = 0x14;
+
+    // --- BYTE 4: Entire Display ON (0xA5) ---
+    while(!txisEmpty()) { if(nackFlagDetected()) { goto handle_nack; } }
+    I2C_TXDR = 0xA5;
+
+    // --- BYTE 5: Wake Display Up (0xAF) ---
+    while(!txisEmpty()) { if(nackFlagDetected()) { goto handle_nack; } }
+    I2C_TXDR = 0xAF;
+
+    // 5. Wait for Auto-End to generate the STOP condition safely
+    while(!stopFlagDetected());
+    I2C_ICR |= (1 << 5); // Clear stop flag
+    return;
+
+handle_nack:
+    I2C_CR2 |= (1 << 14); // Generate software STOP
+    I2C_ICR = (1 << 4);   // Clear NACK flag
+}
+
+// Helper function to send a single independent command
+void sendOLEDCommand(uint8_t cmd) {
+    I2C_ICR |= (1 << 5) | (1 << 4) | (1 << 8); // Clear flags
+    I2C_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+    // NBYTES = 2, Address = 0x3C, AUTOEND = 1
+    I2C_CR2 = (2 << 16) | (0x3C << 1) | (1 << 25);
+    I2C_CR2 |= (1 << 13); // START
+
+    // Byte 1: Control Byte (0x00 means next byte is a command)
+    while(!txisEmpty());
+    I2C_TXDR = 0x00;
+
+    // Byte 2: The actual command
+    while(!txisEmpty());
+    I2C_TXDR = cmd;
+
+    while(!stopFlagDetected());
+    I2C_ICR |= (1 << 5); // Clear STOP
+}
+
+// Call them sequentially in your test function:
+void testDisplayOn() {
+    sendOLEDCommand(0x8D); // Setup Charge Pump
+    sendOLEDCommand(0x14); // Enable Charge Pump
+    sendOLEDCommand(0xA5); // Entire Display ON
+    sendOLEDCommand(0xAF); // Display ON Panel
+}
+
+
 //return 1 if Busy
 int checkBusyRegister(){
 	if(I2C_ISR & (1 << 15)){
