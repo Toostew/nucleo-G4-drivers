@@ -1,3 +1,4 @@
+"./Core/Src/dmaEx.o"
 "./Core/Src/driverEx.o"
 "./Core/Src/i2c.o"
 "./Core/Src/main.o"

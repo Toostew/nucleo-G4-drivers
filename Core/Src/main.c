@@ -117,6 +117,8 @@ int main(void)
   uartPinConfig();
    I2C_Configuration();
    testDisplayOn();
+   HAL_Delay(10);
+   pingSensorTest();
   while (1)
   {
 
