@@ -81,11 +81,14 @@ void I2C_Configuration(){
 
 	//I2C Configuration
 	//disable I2C just in case
-	I2C_CR1 &= ~(1 << 0);
+	I2C_CR1 &= ~((1 << 0) | (1 << 14));
 
 	I2C_TIMINGR = 0x00000000; //reset values to default
 
 	I2C_TIMINGR |= ((0x3 << 28) | (0x13 << 0) | (0xF << 8) | (0x4 << 20) | (0x2 << 16));
+
+	//TXDMAEN enabled, turn on DMA transmussuib requests
+	I2C_CR1 |= (1 << 14); // disable if not using DMA
 
 	//enable I2C
 	I2C_CR1 |= (1 << 0);
@@ -192,6 +195,22 @@ void toggleDisplay(){
 handle_nack:
     I2C_CR2 |= (1 << 14); // Generate software STOP
     I2C_ICR = (1 << 4);   // Clear NACK flag
+}
+
+//special toggleDisplay using DMA
+uint8_t* toggleDisplayDMA(){
+	//clear cr2 config
+	I2C_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+	//Set NBYTES = 5, Write Mode (0<<10), Address (0x3C << 1), and AUTOEND = 1 (1 << 25)
+	I2C_CR2 |= (5 << 16) | (0 << 10) | (0x3C << 1) | (1 << 25);
+
+	static uint8_t commands[5] = {0x00, 0x8D, 0x14, 0xA5, 0xAF};
+
+
+
+	//returning commands and not &commands since commands already acts as a pointer to the first object in array
+	return commands;
 }
 
 // Helper function to send a single independent command

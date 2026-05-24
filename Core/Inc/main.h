@@ -34,6 +34,7 @@ extern "C" {
 
 #include "i2c.h"
 #include "uartEx.h"
+#include "dmaEx.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */

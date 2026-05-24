@@ -19,6 +19,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+
+#define I2C1_BASE_ADDR		0x40005400
+#define I2C_CR2				(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x04UL)))
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -116,9 +120,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   uartPinConfig();
    I2C_Configuration();
-   testDisplayOn();
-   HAL_Delay(10);
-   pingSensorTest();
+   uint8_t * commandArray = ((uint8_t *) toggleDisplayDMA());
+   dmaSetupOLED(commandArray);
+
+   I2C_CR2 |= (1 << 13); //generate start bit, basically start the thing
   while (1)
   {
 
