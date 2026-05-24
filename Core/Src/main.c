@@ -120,16 +120,25 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   uartPinConfig();
    I2C_Configuration();
-   uint8_t * commandArray = ((uint8_t *) toggleDisplayDMA());
-   dmaSetupOLED(commandArray);
+   dmaSetupOLED();
+   uint8_t arrayPointer[5] = {0x00, 0x8D, 0x14,0xA5,0xAF};
+   transmitOLED(arrayPointer, 5);
 
-   I2C_CR2 |= (1 << 13); //generate start bit, basically start the thing
+
+
+
+
+
   while (1)
   {
 
-    /* USER CODE END WHILE */
+	  HAL_Delay(1000); //delay one second
+	  uint8_t arrayPointer2[2] = {0x00, 0xAE}; //turn off screen
+	  transmitOLED(arrayPointer2, 2);
+	  HAL_Delay(1000); //delay one second
+	  uint8_t arrayPointer3[2] = {0x00, 0xAF};
+	  transmitOLED(arrayPointer3, 2);
 
-    /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }

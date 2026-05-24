@@ -14,7 +14,8 @@
 #include "stm32g4xx_nucleo.h"
 #include <stdio.h>
 
-void dmaSetupOLED(uint8_t * oledBuffer);
+void dmaSetupOLED();
+void transmitOLED(uint8_t* arrayPointer, uint16_t numberOfBytes);
 
 
 #endif /* INC_DMAEX_H_ */

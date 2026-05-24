@@ -198,19 +198,15 @@ handle_nack:
 }
 
 //special toggleDisplay using DMA
-uint8_t* toggleDisplayDMA(){
+//deprecated, everything is consolidated in dmaEx/transmitOLED
+void displayOLEDDMAConfig(uint8_t numberOfBytes){
 	//clear cr2 config
 	I2C_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
 
 	//Set NBYTES = 5, Write Mode (0<<10), Address (0x3C << 1), and AUTOEND = 1 (1 << 25)
-	I2C_CR2 |= (5 << 16) | (0 << 10) | (0x3C << 1) | (1 << 25);
-
-	static uint8_t commands[5] = {0x00, 0x8D, 0x14, 0xA5, 0xAF};
+	I2C_CR2 |= (numberOfBytes << 16) | (0 << 10) | (0x3C << 1) | (1 << 25);
 
 
-
-	//returning commands and not &commands since commands already acts as a pointer to the first object in array
-	return commands;
 }
 
 // Helper function to send a single independent command
