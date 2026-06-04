@@ -27,7 +27,7 @@
 ../Core/Src/tasks.c:4451:17:uxTaskGetSystemState	32	static
 ../Core/Src/tasks.c:4612:12:xTaskCatchUpTicks	24	static,ignoring_inline_asm
 ../Core/Src/tasks.c:4736:12:xTaskIncrementTick	48	static,ignoring_inline_asm
-../Core/Src/tasks.c:5120:10:vTaskSwitchContext	40	static,ignoring_inline_asm
+../Core/Src/tasks.c:5120:10:vTaskSwitchContext	32	static,ignoring_inline_asm
 ../Core/Src/tasks.c:5307:6:vTaskPlaceOnEventList	24	static,ignoring_inline_asm
 ../Core/Src/tasks.c:5336:6:vTaskPlaceOnUnorderedEventList	40	static,ignoring_inline_asm
 ../Core/Src/tasks.c:5368:10:vTaskPlaceOnEventListRestricted	32	static,ignoring_inline_asm

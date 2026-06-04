@@ -1,4 +1,4 @@
-../Core/Src/heap_4.c:173:8:pvPortMalloc	27
+../Core/Src/heap_4.c:173:8:pvPortMalloc	26
 ../Core/Src/heap_4.c:354:6:vPortFree	9
 ../Core/Src/heap_4.c:413:8:xPortGetFreeHeapSize	1
 ../Core/Src/heap_4.c:419:8:xPortGetMinimumEverFreeHeapSize	1

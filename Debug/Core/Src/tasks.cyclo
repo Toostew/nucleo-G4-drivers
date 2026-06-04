@@ -26,8 +26,8 @@
 ../Core/Src/tasks.c:4237:8:pcTaskGetName	3
 ../Core/Src/tasks.c:4451:17:uxTaskGetSystemState	4
 ../Core/Src/tasks.c:4612:12:xTaskCatchUpTicks	2
-../Core/Src/tasks.c:4736:12:xTaskIncrementTick	14
-../Core/Src/tasks.c:5120:10:vTaskSwitchContext	9
+../Core/Src/tasks.c:4736:12:xTaskIncrementTick	13
+../Core/Src/tasks.c:5120:10:vTaskSwitchContext	4
 ../Core/Src/tasks.c:5307:6:vTaskPlaceOnEventList	2
 ../Core/Src/tasks.c:5336:6:vTaskPlaceOnUnorderedEventList	3
 ../Core/Src/tasks.c:5368:10:vTaskPlaceOnEventListRestricted	3
