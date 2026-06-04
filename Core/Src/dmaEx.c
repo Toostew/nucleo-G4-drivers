@@ -74,9 +74,9 @@ void transmitOLED(uint8_t* arrayPointer, uint16_t numberOfBytes){
 
 	//reset and set bytes to be moved
 	DMA_CNDTR2 = 0x00000000; //reset values
-	DMA_CNDTR2 = (numberOfBytes << 0); //5 bytes to be moved
+	DMA_CNDTR2 = (numberOfBytes << 0); //x bytes to be moved
 
-	DMA_CMAR2 = (uint32_t)(arrayPointer);		//CMAR; Controller Memory Address; basically where we store our array of data to send
+	DMA_CMAR2 = (uint32_t)(arrayPointer);		//CMAR; Controller Memory Address; basically where we store our array of data to send, typecast to 32 bit unsigned int
 
 	//clear cr2 config, //bit 23 - 16 are the number of bytes we have to clear the whole thing
 	I2C_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));

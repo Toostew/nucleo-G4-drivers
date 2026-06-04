@@ -43,15 +43,15 @@ void clockTest(){
 
 	#define TIM_2_BASE_ADDR		(0x40000000) //TIM2 base address
 	#define TIM2_PRESCALER		(*((volatile uint32_t *)(TIM_2_BASE_ADDR + 0x028UL)))
-	#define TIM2_ARR		(*((volatile uint32_t *)(TIM_2_BASE_ADDR + 0x02CUL))) //auto reload register
-	#define TIM2_DIER		(*((volatile uint32_t *)(TIM_2_BASE_ADDR + 0x00CUL))) //DMA/Interrupt enable register
-	#define TIM2_CR1		(*((volatile uint32_t *)(TIM_2_BASE_ADDR))) //TIM2 Control Register
+	#define TIM2_ARR			(*((volatile uint32_t *)(TIM_2_BASE_ADDR + 0x02CUL))) //auto reload register
+	#define TIM2_DIER			(*((volatile uint32_t *)(TIM_2_BASE_ADDR + 0x00CUL))) //DMA/Interrupt enable register
+	#define TIM2_CR1			(*((volatile uint32_t *)(TIM_2_BASE_ADDR))) //TIM2 Control Register
 
 
-	#define NVIC_BASE_ADDR	0xE000E000 //base address for NVIC, found in ARM Cortex-M4's reference manual, not STM32
-	#define NVIC_IPR		((volatile uint8_t  *)(NVIC_BASE_ADDR + 0x400UL)) //Interrupt priority register, 8 bit
-	#define NVIC_ISER0		(*((volatile uint32_t *)(NVIC_BASE_ADDR + 0x100UL))) //Interrupt Set-Enable Registers, 32 bit
-	#define TIM2_IRQN		28
+	#define NVIC_BASE_ADDR		0xE000E000 //base address for NVIC, found in ARM Cortex-M4's reference manual, not STM32
+	#define NVIC_IPR			((volatile uint8_t  *)(NVIC_BASE_ADDR + 0x400UL)) //Interrupt priority register, 8 bit
+	#define NVIC_ISER0			(*((volatile uint32_t *)(NVIC_BASE_ADDR + 0x100UL))) //Interrupt Set-Enable Registers, 32 bit
+	#define TIM2_IRQN			28
 
 
 
