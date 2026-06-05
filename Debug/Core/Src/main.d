@@ -31,7 +31,18 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo.h \
  ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo_errno.h \
  ../Core/Inc/stm32g4xx_nucleo_conf.h ../Core/Inc/i2c.h \
- ../Core/Inc/uartEx.h ../Core/Inc/dmaEx.h
+ ../Core/Inc/uartEx.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/FreeRTOS.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/FreeRTOSConfig.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/projdefs.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/portable.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/deprecated_definitions.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/portmacro.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/mpu_wrappers.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/task.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/list.h ../Core/Inc/dmaEx.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/timers.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/task.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../Core/Inc/stm32g4xx_hal_conf.h:
@@ -67,4 +78,15 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/stm32g4xx_nucleo_conf.h:
 ../Core/Inc/i2c.h:
 ../Core/Inc/uartEx.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/FreeRTOS.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/FreeRTOSConfig.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/projdefs.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/portable.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/deprecated_definitions.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/portmacro.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/mpu_wrappers.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/task.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/list.h:
 ../Core/Inc/dmaEx.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/timers.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/task.h:

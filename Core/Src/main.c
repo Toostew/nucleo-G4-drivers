@@ -119,21 +119,26 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uartPinConfig();
-  togglePin();
+
+  xTaskCreate(togglePinPB1, //the function that implements this task
+		  "LED_PB1", //the name of this task
+		  128, // stack depth, or size of stack in words, so 128 x 4 bytes per word, that's 512 bytes
+		  NULL, //task parameters, null means this task doesnt need anymore outside data
+		  1, //task priority, higher priority will allow it to cut in line for CPU time and maintain it
+		  NULL); //reference handle
+
+  xTaskCreate(togglePinPB2,
+		  "LED_PB2",
+		  128,
+		  NULL,
+		  1,
+		  NULL);
 
 
+  vTaskStartScheduler();
 
+  while (1);
 
-
-  while (1)
-  {
-	 HAL_Delay(100);
-	 togglePin();
-	 HAL_Delay(100);
-	 togglePin();
-
-
-  }
   /* USER CODE END 3 */
 }
 

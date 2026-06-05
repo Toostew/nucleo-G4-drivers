@@ -79,18 +79,39 @@ void uartPinConfig(){
 	USART_CR1 |= (1 << 0); //UE: USART ENABLE.
 
 	//PIN SETUP
-	GPIOB_MODER &= ~(11 << 2);
-	GPIOB_MODER |= (1 << 2);
+	GPIOB_MODER &= ~(11 << 2); //pb1
+	GPIOB_MODER &= ~(11 << 4); //pb2
+	GPIOB_MODER |= (1 << 2); //pb1
+	GPIOB_MODER |= (1 << 4); //pb2
 }
 
 //toggle pin B1 on or off depending on current state using ODR
-void togglePin(){
-	if(GPIOB_ODR & (1 << 1)){
+void togglePinPB1(void *pvParameters){
+	//functions must not return, so they must always loop
+	while(1){
+		if(GPIOB_ODR & (1 << 1)){
 		//this is using the stm32 HAL, GPIOB is a struct
-		GPIOB->BSRR |= (1 << (1 + 16));
-	} else {
-		GPIOB->BSRR |= (1 << (1));
+		GPIOB->BSRR = (1 << (1 + 16));
+		} else {
+		GPIOB->BSRR = (1 << (1));
+		}
+		//vTaskDelay makes it sleep, forcing the task to blocked state
+		vTaskDelay(pdMS_TO_TICKS(500));
 	}
+
+}
+
+void togglePinPB2(void *pvParameters){
+	while(1){
+		if(GPIOB_ODR & (1 << 2)){
+		//this is using the stm32 HAL, GPIOB is a struct
+		GPIOB->BSRR = (1 << (2 + 16));
+		} else {
+		GPIOB->BSRR = (1 << (2));
+		}
+		vTaskDelay(pdMS_TO_TICKS(500));
+	}
+
 }
 
 

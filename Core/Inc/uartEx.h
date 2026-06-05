@@ -11,9 +11,12 @@
 #include "stm32g4xx_nucleo.h"
 #include "stm32g4xx_hal.h"
 #include <stdio.h>
+#include "FreeRTOS.h"
+#include "task.h"
 
 void uartPinConfig();
-void togglePin();
+void togglePinPB1();
+void togglePinPB2();
 void UARTSendChar(char c);
 void UARTSendString(char* str); //remember a string is just an array of chars, we could just store the first char in the array
 void print_hex(uint32_t value);

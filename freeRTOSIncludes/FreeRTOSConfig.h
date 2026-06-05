@@ -52,7 +52,7 @@
 
 	//hooks are like automatic code that runs when a certain condition occurs
 
-#define configUSE_PREEMPTION			1
+#define configUSE_PREEMPTION			1 //this controls whether higher priority tasks can kick off lower priority process for CPU time. if 0; processes must manually yield
 #define configUSE_IDLE_HOOK				0 //swapped from 1
 #define configUSE_TICK_HOOK				0 //swapped from 1
 #define configCPU_CLOCK_HZ				( SystemCoreClock )

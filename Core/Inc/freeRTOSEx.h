@@ -9,6 +9,8 @@
 #define INC_FREERTOSEX_H_
 
 #include "uartEx.h"
-
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
 
 #endif /* INC_FREERTOSEX_H_ */
