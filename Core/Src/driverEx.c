@@ -90,8 +90,8 @@ void PWM_Test(){
 	#define TIM3_ARR		(*((volatile uint32_t *)(TIM_3_BASE_ADDR + 0x02CUL))) //auto reload register
 	#define TIM3_DIER		(*((volatile uint32_t *)(TIM_3_BASE_ADDR + 0x00CUL))) //DMA/Interrupt enable register
 	#define TIM3_CR1		(*((volatile uint32_t *)(TIM_3_BASE_ADDR)))
-#define TIM3_CCMR2    (*((volatile uint32_t *)(TIM_3_BASE_ADDR + 0x1CUL))) // Register for Ch3 and Ch4
-#define TIM3_CCR3     (*((volatile uint32_t *)(TIM_3_BASE_ADDR + 0x3CUL))) // Duty cycle for Ch3
+	#define TIM3_CCMR2    (*((volatile uint32_t *)(TIM_3_BASE_ADDR + 0x1CUL))) // Register for Ch3 and Ch4
+	#define TIM3_CCR3     (*((volatile uint32_t *)(TIM_3_BASE_ADDR + 0x3CUL))) // Duty cycle for Ch3
 	#define TIM3_CCER		(*((volatile uint32_t *)(TIM_3_BASE_ADDR + 0x020UL)))
 	#define TIM3_EGR		(*((volatile uint32_t *)(TIM_3_BASE_ADDR + 0x014UL)))
 

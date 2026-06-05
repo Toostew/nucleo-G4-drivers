@@ -1,4 +1,5 @@
-../Core/Src/uartEx.c:36:6:uartPinConfig	4	static
-../Core/Src/uartEx.c:80:6:UARTSendChar	16	static
-../Core/Src/uartEx.c:90:6:UARTSendString	16	static
-../Core/Src/uartEx.c:96:6:print_hex	48	static
+../Core/Src/uartEx.c:41:6:uartPinConfig	4	static
+../Core/Src/uartEx.c:87:6:togglePin	4	static
+../Core/Src/uartEx.c:99:6:UARTSendChar	16	static
+../Core/Src/uartEx.c:109:6:UARTSendString	16	static
+../Core/Src/uartEx.c:115:6:print_hex	48	static

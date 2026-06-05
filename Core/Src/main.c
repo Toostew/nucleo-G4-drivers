@@ -119,11 +119,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uartPinConfig();
-   I2C_Configuration();
-   dmaSetupOLED();
-   uint8_t arrayPointer[5] = {0x00, 0x8D, 0x14,0xA5,0xAF};
-   transmitOLED(arrayPointer, 5);
-
+  togglePin();
 
 
 
@@ -131,13 +127,11 @@ int main(void)
 
   while (1)
   {
+	 HAL_Delay(100);
+	 togglePin();
+	 HAL_Delay(100);
+	 togglePin();
 
-	  HAL_Delay(1000); //delay one second
-	  uint8_t arrayPointer2[2] = {0x00, 0xAE}; //turn off screen
-	  transmitOLED(arrayPointer2, 2);
-	  HAL_Delay(1000); //delay one second
-	  uint8_t arrayPointer3[2] = {0x00, 0xAF};
-	  transmitOLED(arrayPointer3, 2);
 
   }
   /* USER CODE END 3 */

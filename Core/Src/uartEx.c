@@ -12,6 +12,7 @@
 
 //base address
 #define GPIOA_BASE_ADDR 0x48000000UL
+#define GPIOB_BASE_ADDR 0x48000400UL
 #define RCC_AHB1_BASE_ADDR 0x40021000UL //APB2 sources from AHB1, refer to clock tree
 #define APB2_USART1		0x40013800UL // Base address for USART in APB2 Bus
 
@@ -19,6 +20,9 @@
 
 #define GPIOA_MODER 	(*((volatile uint32_t *)(GPIOA_BASE_ADDR + 0x000UL))) //literally the first part range
 #define GPIOA_AFRH 		(*((volatile uint32_t *)(GPIOA_BASE_ADDR + 0x24UL))) //Alternate function Register High
+
+#define GPIOB_MODER		(*((volatile uint32_t *)(GPIOB_BASE_ADDR + 0x000UL))) //moder for B pins
+#define GPIOB_ODR		(*((volatile uint32_t *)(GPIOB_BASE_ADDR + 0x14UL))) //Output Data register for B pins
 
 #define RCC_APB2_ENR	(*((volatile uint32_t *)(RCC_AHB1_BASE_ADDR + 0x60UL))) //enable clock for APB2 bus
 #define RCC_AHB2_ENR	(*((volatile uint32_t *)(RCC_AHB1_BASE_ADDR + 0x4CUL))) //enable clock for AHB2 bus
@@ -33,6 +37,7 @@
 
 
 //this function configures pins PA9 and PA10 for USART1 TX and RX respectively
+// 5/6/2026 - added a additional config step to enable pin PB1 for use in blinking demo
 void uartPinConfig(){
 
 	//Reset Clock and control, enable the clocks, without them nothing works, so they come first!
@@ -72,6 +77,20 @@ void uartPinConfig(){
 	USART_CR1 |= (1 << 2); // Enable Receiver
 
 	USART_CR1 |= (1 << 0); //UE: USART ENABLE.
+
+	//PIN SETUP
+	GPIOB_MODER &= ~(11 << 2);
+	GPIOB_MODER |= (1 << 2);
+}
+
+//toggle pin B1 on or off depending on current state using ODR
+void togglePin(){
+	if(GPIOB_ODR & (1 << 1)){
+		//this is using the stm32 HAL, GPIOB is a struct
+		GPIOB->BSRR |= (1 << (1 + 16));
+	} else {
+		GPIOB->BSRR |= (1 << (1));
+	}
 }
 
 
