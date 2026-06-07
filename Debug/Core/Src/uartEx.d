@@ -39,7 +39,9 @@ Core/Src/uartEx.o: ../Core/Src/uartEx.c ../Core/Inc/uartEx.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/portmacro.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/mpu_wrappers.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/task.h \
- D:/stm32workspaces/blink/freeRTOSIncludes/list.h
+ D:/stm32workspaces/blink/freeRTOSIncludes/list.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/queue.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/task.h
 ../Core/Inc/uartEx.h:
 ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo.h:
 ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo_errno.h:
@@ -82,3 +84,5 @@ D:/stm32workspaces/blink/freeRTOSIncludes/portmacro.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/mpu_wrappers.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/task.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/list.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/queue.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/task.h:

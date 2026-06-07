@@ -1,6 +1,7 @@
-../Core/Src/uartEx.c:41:6:uartPinConfig	4	static
-../Core/Src/uartEx.c:89:6:togglePinPB1	16	static
-../Core/Src/uartEx.c:104:6:togglePinPB2	16	static
-../Core/Src/uartEx.c:120:6:UARTSendChar	16	static
-../Core/Src/uartEx.c:130:6:UARTSendString	16	static
-../Core/Src/uartEx.c:136:6:print_hex	48	static
+../Core/Src/uartEx.c:45:6:uartPinConfig	4	static
+../Core/Src/uartEx.c:93:6:togglePinPB1	16	static
+../Core/Src/uartEx.c:108:6:togglePinPB2	24	static
+../Core/Src/uartEx.c:131:6:UARTsendData	24	static
+../Core/Src/uartEx.c:151:6:UARTSendChar	16	static
+../Core/Src/uartEx.c:162:6:UARTSendString	16	static
+../Core/Src/uartEx.c:168:6:print_hex	48	static

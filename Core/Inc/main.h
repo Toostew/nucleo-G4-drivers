@@ -36,9 +36,12 @@ extern "C" {
 #include "uartEx.h"
 #include "dmaEx.h"
 
+
+//FreeRTOS specific
 #include "FreeRTOS.h"
 #include "task.h"
 #include "timers.h"
+#include "queue.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */

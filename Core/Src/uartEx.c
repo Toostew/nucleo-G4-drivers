@@ -36,6 +36,10 @@
 #define USART_TDR    (*((volatile uint32_t *)(APB2_USART1 + 0x28UL))) //max size is 1 byte (8 bits, 256 combinations)
 
 
+
+
+
+
 //this function configures pins PA9 and PA10 for USART1 TX and RX respectively
 // 5/6/2026 - added a additional config step to enable pin PB1 for use in blinking demo
 void uartPinConfig(){
@@ -102,16 +106,43 @@ void togglePinPB1(void *pvParameters){
 }
 
 void togglePinPB2(void *pvParameters){
+	UARTParameters * uartStruct = (UARTParameters *)(pvParameters);
+	char* message;
 	while(1){
 		if(GPIOB_ODR & (1 << 2)){
 		//this is using the stm32 HAL, GPIOB is a struct
 		GPIOB->BSRR = (1 << (2 + 16));
+		message = "PB2 LOW";
 		} else {
 		GPIOB->BSRR = (1 << (2));
+		message = "PB2 HIGH";
 		}
+		xQueueSend(uartStruct->UARTQueue, &message, portMAX_DELAY);
 		vTaskDelay(pdMS_TO_TICKS(500));
 	}
 
+}
+
+//this is the function we will use to implement the task
+//void * means "void pointer", or a plain pointer/memory address of no specific type.
+//pvParameters just mean parameters specific to this function. to implement them, you will need to create
+//a special struct called TaskConfig_t
+
+void UARTsendData(void *pvParameters){
+
+	//receive buffer can hold up to 128 chars in sequence
+	char * receiveBuffer;
+
+	//we cannot immediately treat the parameter as a struct since it arrives as a void pointer
+	//so we need to type cast it to the struct before.
+	UARTParameters * actualStruct = (UARTParameters *)(pvParameters);
+
+	//remember they must always be in a loop! you can use while(1) or for(;;), both function the same
+	while(1){
+		xQueueReceive(actualStruct->UARTQueue, &receiveBuffer, portMAX_DELAY); //blocking if empty
+
+		UARTSendString(receiveBuffer);
+	}
 }
 
 
@@ -127,9 +158,10 @@ void UARTSendChar(char c) {
     USART_TDR = c;
 }
 
+//parameter is essentially a char-type pointer. since strings are chars in an array, we send the first char in the array
 void UARTSendString(char* str) {
     while (*str) {
-        UARTSendChar(*str++);
+        UARTSendChar(*str++); //we then increment the pointer down the array. *str means we are dereferencing
     }
 }
 
