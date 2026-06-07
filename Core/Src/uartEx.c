@@ -90,60 +90,38 @@ void uartPinConfig(){
 }
 
 //toggle pin B1 on or off depending on current state using ODR
-void togglePinPB1(void *pvParameters){
+int togglePinPB1(){
 	//functions must not return, so they must always loop
-	while(1){
+
 		if(GPIOB_ODR & (1 << 1)){
 		//this is using the stm32 HAL, GPIOB is a struct
 		GPIOB->BSRR = (1 << (1 + 16));
+		return 0; //for toggled off
 		} else {
 		GPIOB->BSRR = (1 << (1));
 		}
-		//vTaskDelay makes it sleep, forcing the task to blocked state
-		vTaskDelay(pdMS_TO_TICKS(500));
-	}
+		return 1; //return 1; for toggled on
+
 
 }
 
-void togglePinPB2(void *pvParameters){
-	UARTParameters * uartStruct = (UARTParameters *)(pvParameters);
-	char* message;
-	while(1){
+int togglePinPB2(){
+
 		if(GPIOB_ODR & (1 << 2)){
 		//this is using the stm32 HAL, GPIOB is a struct
 		GPIOB->BSRR = (1 << (2 + 16));
-		message = "PB2 LOW";
+		return 0;
 		} else {
 		GPIOB->BSRR = (1 << (2));
-		message = "PB2 HIGH";
 		}
-		xQueueSend(uartStruct->UARTQueue, &message, portMAX_DELAY);
-		vTaskDelay(pdMS_TO_TICKS(500));
-	}
+		return 1;
+
 
 }
 
-//this is the function we will use to implement the task
-//void * means "void pointer", or a plain pointer/memory address of no specific type.
-//pvParameters just mean parameters specific to this function. to implement them, you will need to create
-//a special struct called TaskConfig_t
 
-void UARTsendData(void *pvParameters){
 
-	//receive buffer can hold up to 128 chars in sequence
-	char * receiveBuffer;
 
-	//we cannot immediately treat the parameter as a struct since it arrives as a void pointer
-	//so we need to type cast it to the struct before.
-	UARTParameters * actualStruct = (UARTParameters *)(pvParameters);
-
-	//remember they must always be in a loop! you can use while(1) or for(;;), both function the same
-	while(1){
-		xQueueReceive(actualStruct->UARTQueue, &receiveBuffer, portMAX_DELAY); //blocking if empty
-
-		UARTSendString(receiveBuffer);
-	}
-}
 
 
 

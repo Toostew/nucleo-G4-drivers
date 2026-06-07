@@ -18,14 +18,11 @@
 
 
 
-typedef struct{
-	QueueHandle_t UARTQueue;
-} UARTParameters;
+
 
 void uartPinConfig();
-void togglePinPB1();
-void togglePinPB2();
-void UARTsendData(void *pvParameters);
+int togglePinPB1();
+int togglePinPB2();
 void UARTSendChar(char c);
 void UARTSendString(char* str); //remember a string is just an array of chars, we could just store the first char in the array
 void print_hex(uint32_t value);

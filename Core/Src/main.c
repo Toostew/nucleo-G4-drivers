@@ -119,41 +119,8 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uartPinConfig();
+  rtos_task_setup();
 
-  QueueHandle_t xUARTQueue = xQueueCreate(64, sizeof(char *));
-
-    //The base struct is found within the uartEx header file
-    static UARTParameters UARTParameter_Config;
-
-	UARTParameter_Config.UARTQueue = xUARTQueue;
-
-
-  xTaskCreate(
-		  togglePinPB1, //the function that implements this task
-		  "LED_PB1", //the name of this task
-		  128, // stack depth, or size of stack in words, so 128 x 4 bytes per word, that's 512 bytes
-		  NULL, //task parameters, null means this task doesnt need anymore outside data
-		  1, //task priority, higher priority will allow it to cut in line for CPU time and maintain it
-		  NULL); //reference handle
-
-  xTaskCreate(
-		  togglePinPB2,
-		  "LED_PB2",
-		  128,
-		  (void *)&UARTParameter_Config,
-		  1,
-		  NULL);
-
-
-
-
-  xTaskCreate(
-		  	 UARTsendData,
-			 "UART_SEND_DATA",
-			 128,
-			 (void *)&UARTParameter_Config, //we are expecting a void pointer so we type def it
-			 1,
-			 NULL);
 
 
   //when this is called the scheduler officially takes over. Ideally nothing past this point gets run

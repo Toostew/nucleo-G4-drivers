@@ -1,0 +1,4 @@
+../Core/Src/freeRTOSEx.c:14:6:rtos_task_setup	24	static
+../Core/Src/freeRTOSEx.c:51:6:toggleLED1	16	static
+../Core/Src/freeRTOSEx.c:60:6:toggleLED2	24	static
+../Core/Src/freeRTOSEx.c:78:6:UARTsendData	24	static
