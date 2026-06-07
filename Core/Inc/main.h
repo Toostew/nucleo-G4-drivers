@@ -36,6 +36,7 @@ extern "C" {
 #include "uartEx.h"
 #include "dmaEx.h"
 #include <freeRTOSQueueTest.h>
+#include "freeRTOSSemaphoreTest.h"
 
 
 //FreeRTOS specific

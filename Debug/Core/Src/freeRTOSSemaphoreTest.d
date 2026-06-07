@@ -1,4 +1,5 @@
-Core/Src/stm32g4xx_it.o: ../Core/Src/stm32g4xx_it.c ../Core/Inc/main.h \
+Core/Src/freeRTOSSemaphoreTest.o: ../Core/Src/freeRTOSSemaphoreTest.c \
+ ../Core/Inc/freeRTOSSemaphoreTest.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h \
  ../Core/Inc/stm32g4xx_hal_conf.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h \
@@ -43,13 +44,12 @@ Core/Src/stm32g4xx_it.o: ../Core/Src/stm32g4xx_it.c ../Core/Inc/main.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/list.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/queue.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/task.h ../Core/Inc/dmaEx.h \
- ../Core/Inc/freeRTOSQueueTest.h ../Core/Inc/freeRTOSSemaphoreTest.h \
+ ../Core/Inc/freeRTOSQueueTest.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/timers.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/list.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/semphr.h \
- D:/stm32workspaces/blink/freeRTOSIncludes/queue.h \
- ../Core/Inc/stm32g4xx_it.h
-../Core/Inc/main.h:
+ D:/stm32workspaces/blink/freeRTOSIncludes/queue.h
+../Core/Inc/freeRTOSSemaphoreTest.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../Core/Inc/stm32g4xx_hal_conf.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h:
@@ -97,9 +97,7 @@ D:/stm32workspaces/blink/freeRTOSIncludes/queue.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/task.h:
 ../Core/Inc/dmaEx.h:
 ../Core/Inc/freeRTOSQueueTest.h:
-../Core/Inc/freeRTOSSemaphoreTest.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/timers.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/list.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/semphr.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/queue.h:
-../Core/Inc/stm32g4xx_it.h:

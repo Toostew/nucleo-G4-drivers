@@ -43,8 +43,11 @@ Core/Src/stm32g4xx_hal_msp.o: ../Core/Src/stm32g4xx_hal_msp.c \
  D:/stm32workspaces/blink/freeRTOSIncludes/list.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/queue.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/task.h ../Core/Inc/dmaEx.h \
- ../Core/Inc/freeRTOSQueueTest.h \
- D:/stm32workspaces/blink/freeRTOSIncludes/timers.h
+ ../Core/Inc/freeRTOSQueueTest.h ../Core/Inc/freeRTOSSemaphoreTest.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/timers.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/list.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/semphr.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/queue.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../Core/Inc/stm32g4xx_hal_conf.h:
@@ -93,4 +96,8 @@ D:/stm32workspaces/blink/freeRTOSIncludes/queue.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/task.h:
 ../Core/Inc/dmaEx.h:
 ../Core/Inc/freeRTOSQueueTest.h:
+../Core/Inc/freeRTOSSemaphoreTest.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/timers.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/list.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/semphr.h:
+D:/stm32workspaces/blink/freeRTOSIncludes/queue.h:

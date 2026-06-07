@@ -1,6 +1,6 @@
 ../Core/Src/uartEx.c:45:6:uartPinConfig	1
-../Core/Src/uartEx.c:94:5:togglePinPB1	2
-../Core/Src/uartEx.c:109:5:togglePinPB2	2
-../Core/Src/uartEx.c:129:6:UARTSendChar	2
-../Core/Src/uartEx.c:140:6:UARTSendString	2
-../Core/Src/uartEx.c:149:6:print_hex	2
+../Core/Src/uartEx.c:95:5:togglePinPB1	2
+../Core/Src/uartEx.c:110:5:togglePinPB2	2
+../Core/Src/uartEx.c:130:6:UARTSendChar	2
+../Core/Src/uartEx.c:141:6:UARTSendString	2
+../Core/Src/uartEx.c:150:6:print_hex	2

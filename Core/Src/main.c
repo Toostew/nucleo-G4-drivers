@@ -120,7 +120,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   uartPinConfig();
   rtos_task_setup();
-
+  pinConfig();
+  semaphoreConfig();
 
 
   //when this is called the scheduler officially takes over. Ideally nothing past this point gets run
