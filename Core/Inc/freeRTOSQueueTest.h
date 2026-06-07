@@ -5,8 +5,8 @@
  *      Author: tooka
  */
 
-#ifndef INC_FREERTOSEX_H_
-#define INC_FREERTOSEX_H_
+#ifndef INC_FREERTOSQUEUETEST_H_
+#define INC_FREERTOSQUEUETEST_H_
 
 
 
@@ -30,4 +30,4 @@ void toggleLED1();
 void toggleLED2();
 void UARTsendData();
 
-#endif /* INC_FREERTOSEX_H_ */
+#endif /* INC_FREERTOSQUEUETEST_H_ */

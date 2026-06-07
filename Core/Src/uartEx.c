@@ -83,8 +83,10 @@ void uartPinConfig(){
 	USART_CR1 |= (1 << 0); //UE: USART ENABLE.
 
 	//PIN SETUP
-	GPIOB_MODER &= ~(11 << 2); //pb1
-	GPIOB_MODER &= ~(11 << 4); //pb2
+	//0b is binary, 0x is hex
+	GPIOB_MODER &= ~(0b11 << 2); //pb1
+	GPIOB_MODER &= ~(0b11 << 4); //pb2
+	GPIOB_MODER &= ~(0b11 << 30); //pb15; GPIO_INPUT
 	GPIOB_MODER |= (1 << 2); //pb1
 	GPIOB_MODER |= (1 << 4); //pb2
 }
@@ -115,7 +117,6 @@ int togglePinPB2(){
 		GPIOB->BSRR = (1 << (2));
 		}
 		return 1;
-
 
 }
 

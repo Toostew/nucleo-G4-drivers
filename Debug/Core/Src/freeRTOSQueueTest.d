@@ -1,4 +1,5 @@
-Core/Src/freeRTOSEx.o: ../Core/Src/freeRTOSEx.c ../Core/Inc/freeRTOSEx.h \
+Core/Src/freeRTOSQueueTest.o: ../Core/Src/freeRTOSQueueTest.c \
+ ../Core/Inc/freeRTOSQueueTest.h \
  ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo.h \
  ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo_errno.h \
  ../Core/Inc/stm32g4xx_nucleo_conf.h \
@@ -43,7 +44,7 @@ Core/Src/freeRTOSEx.o: ../Core/Src/freeRTOSEx.c ../Core/Inc/freeRTOSEx.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/list.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/queue.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/task.h
-../Core/Inc/freeRTOSEx.h:
+../Core/Inc/freeRTOSQueueTest.h:
 ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo.h:
 ../Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo_errno.h:
 ../Core/Inc/stm32g4xx_nucleo_conf.h:

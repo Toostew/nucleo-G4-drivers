@@ -1,4 +1,0 @@
-../Core/Src/freeRTOSEx.c:14:6:rtos_task_setup	1
-../Core/Src/freeRTOSEx.c:51:6:toggleLED1	1
-../Core/Src/freeRTOSEx.c:60:6:toggleLED2	2
-../Core/Src/freeRTOSEx.c:78:6:UARTsendData	1
