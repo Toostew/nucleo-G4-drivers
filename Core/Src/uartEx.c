@@ -141,6 +141,9 @@ void UARTSendString(char* str) {
     while (*str) {
         UARTSendChar(*str++); //we then increment the pointer down the array. *str means we are dereferencing
     }
+    UARTSendChar('\n'); //\n for a new line, but doesn't reset to far left of terminal
+    UARTSendChar('\r'); //\r moves cursor to far left
+
 }
 
 void print_hex(uint32_t num) {

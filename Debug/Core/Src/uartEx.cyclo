@@ -3,4 +3,4 @@
 ../Core/Src/uartEx.c:108:5:togglePinPB2	2
 ../Core/Src/uartEx.c:129:6:UARTSendChar	2
 ../Core/Src/uartEx.c:140:6:UARTSendString	2
-../Core/Src/uartEx.c:146:6:print_hex	2
+../Core/Src/uartEx.c:149:6:print_hex	2
