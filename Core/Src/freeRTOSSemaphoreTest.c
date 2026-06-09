@@ -80,18 +80,22 @@ void semaphoreConfig(){
 
 //this funciton follows a specific name nomenclature.
 void EXTI15_10_IRQHandler() {
-    //check pending flag
+    //check pending flag, it's bit 15
     if (EXTI_PR1 & (1 << 15)) {
 
-        // 2. Clear the hardware pending flag (Write 1 to clear)
+        //Clear the hardware pending flag (Write 1 to clear), cleared by writing 1 to that bit
         EXTI_PR1 = (1 << 15);
 
         BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-        // 3. Safely unlock the software task from the hardware domain
+        //special ISR variant of semaphoreGive. used specifically for interrupt situations
+        //the second parameter is a priority check, if the task that was "awoken" is higher priority than the
+        //task that was running just before the interrupt, then it returns as pdTRUE. Otherwise pdFALSE.
         xSemaphoreGiveFromISR(buttonSemaphore, &xHigherPriorityTaskWoken);
 
-        // 4. Force your RTOS scheduler to instantly switch contexts if needed
+        //Force RTOS scheduler to instantly switch contexts if needed
+        //if the task that was awoken is higher priority, do the context switch
+        //otherwise, why even bother? logically, the task that was already running is higher priority
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 }

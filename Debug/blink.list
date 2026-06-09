@@ -736,7 +736,7 @@ void EXTI15_10_IRQHandler() {
  8000760:	b580      	push	{r7, lr}
  8000762:	b082      	sub	sp, #8
  8000764:	af00      	add	r7, sp, #0
-    //check pending flag
+    //check pending flag, it's bit 15
     if (EXTI_PR1 & (1 << 15)) {
  8000766:	4b11      	ldr	r3, [pc, #68]	@ (80007ac <EXTI15_10_IRQHandler+0x4c>)
  8000768:	681b      	ldr	r3, [r3, #0]
@@ -744,7 +744,7 @@ void EXTI15_10_IRQHandler() {
  800076e:	2b00      	cmp	r3, #0
  8000770:	d017      	beq.n	80007a2 <EXTI15_10_IRQHandler+0x42>
 
-        // 2. Clear the hardware pending flag (Write 1 to clear)
+        //Clear the hardware pending flag (Write 1 to clear), cleared by writing 1 to that bit
         EXTI_PR1 = (1 << 15);
  8000772:	4b0e      	ldr	r3, [pc, #56]	@ (80007ac <EXTI15_10_IRQHandler+0x4c>)
  8000774:	f44f 4200 	mov.w	r2, #32768	@ 0x8000
@@ -754,7 +754,9 @@ void EXTI15_10_IRQHandler() {
  800077a:	2300      	movs	r3, #0
  800077c:	607b      	str	r3, [r7, #4]
 
-        // 3. Safely unlock the software task from the hardware domain
+        //special ISR variant of semaphoreGive.used specifically for interrupt situations
+        //the second parameter is a priority check, if the task that was "awoken" is higher priority than the
+        //task that was running just before the interrupt, then it returns as pdTRUE. Otherwise pdFALSE.
         xSemaphoreGiveFromISR(buttonSemaphore, &xHigherPriorityTaskWoken);
  800077e:	4b0c      	ldr	r3, [pc, #48]	@ (80007b0 <EXTI15_10_IRQHandler+0x50>)
  8000780:	681b      	ldr	r3, [r3, #0]
@@ -763,7 +765,9 @@ void EXTI15_10_IRQHandler() {
  8000786:	4618      	mov	r0, r3
  8000788:	f001 f908 	bl	800199c <xQueueGiveFromISR>
 
-        // 4. Force your RTOS scheduler to instantly switch contexts if needed
+        //Force RTOS scheduler to instantly switch contexts if needed
+        //if the task that was awoken is higher priority, do the context switch
+        //otherwise, why even bother? logically, the task that was already running is higher priority
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
  800078c:	687b      	ldr	r3, [r7, #4]
  800078e:	2b00      	cmp	r3, #0
