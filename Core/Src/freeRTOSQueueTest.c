@@ -40,8 +40,8 @@ void rtos_task_setup(){
 
 	  xTaskCreate(
 			  UARTsendData,
-			  "UART_SEND_DATA",
-			  128,
+			  "UART_SEND_DATA", //name of task
+			  128,	//size of stack in words
 			  (void *)&UARTParameter_Config, //we are expecting a void pointer so we type def it
 			  1,
 			  NULL);
@@ -60,6 +60,7 @@ void toggleLED1(void * pvParameters){
 void toggleLED2(void * pvParameters){
 	UARTParameters *parameter_struct = (UARTParameters *)pvParameters;
 
+	//the message is actually just an array of chars in memory
 	char * message;
 	while(1){
 		if(togglePinPB2()){

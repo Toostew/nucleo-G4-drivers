@@ -477,8 +477,8 @@ void rtos_task_setup(){
  80005cc:	4908      	ldr	r1, [pc, #32]	@ (80005f0 <rtos_task_setup+0x70>)
  80005ce:	4809      	ldr	r0, [pc, #36]	@ (80005f4 <rtos_task_setup+0x74>)
  80005d0:	f001 fefe 	bl	80023d0 <xTaskCreate>
-			  "UART_SEND_DATA",
-			  128,
+			  "UART_SEND_DATA", //name of task
+			  128,	//size of stack in words
 			  (void *)&UARTParameter_Config, //we are expecting a void pointer so we type def it
 			  1,
 			  NULL);
@@ -528,6 +528,7 @@ void toggleLED2(void * pvParameters){
  8000618:	687b      	ldr	r3, [r7, #4]
  800061a:	60fb      	str	r3, [r7, #12]
 
+	//the message is actually just an array of chars in memory
 	char * message;
 	while(1){
 		if(togglePinPB2()){
@@ -754,7 +755,7 @@ void EXTI15_10_IRQHandler() {
  800077a:	2300      	movs	r3, #0
  800077c:	607b      	str	r3, [r7, #4]
 
-        //special ISR variant of semaphoreGive.used specifically for interrupt situations
+        //special ISR variant of semaphoreGive. used specifically for interrupt situations
         //the second parameter is a priority check, if the task that was "awoken" is higher priority than the
         //task that was running just before the interrupt, then it returns as pdTRUE. Otherwise pdFALSE.
         xSemaphoreGiveFromISR(buttonSemaphore, &xHigherPriorityTaskWoken);
