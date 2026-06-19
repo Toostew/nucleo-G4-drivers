@@ -664,7 +664,7 @@ Discarded input sections
  .data          0x00000000        0x0 ./Core/Src/i2c.o
  .bss           0x00000000        0x0 ./Core/Src/i2c.o
  .text.I2C_Configuration
-                0x00000000      0x180 ./Core/Src/i2c.o
+                0x00000000      0x2d4 ./Core/Src/i2c.o
  .text.pingSensorTest
                 0x00000000       0xe0 ./Core/Src/i2c.o
  .text.toggleDisplay
@@ -690,13 +690,13 @@ Discarded input sections
                 0x00000000       0x24 ./Core/Src/i2c.o
  .text.busError
                 0x00000000       0x24 ./Core/Src/i2c.o
- .debug_info    0x00000000      0x214 ./Core/Src/i2c.o
+ .debug_info    0x00000000      0x21a ./Core/Src/i2c.o
  .debug_abbrev  0x00000000      0x130 ./Core/Src/i2c.o
  .debug_aranges
                 0x00000000       0x88 ./Core/Src/i2c.o
  .debug_rnglists
                 0x00000000       0x65 ./Core/Src/i2c.o
- .debug_macro   0x00000000      0x378 ./Core/Src/i2c.o
+ .debug_macro   0x00000000      0x3a2 ./Core/Src/i2c.o
  .debug_macro   0x00000000      0xade ./Core/Src/i2c.o
  .debug_macro   0x00000000      0x15b ./Core/Src/i2c.o
  .debug_macro   0x00000000       0x2e ./Core/Src/i2c.o
@@ -758,10 +758,10 @@ Discarded input sections
  .debug_macro   0x00000000       0x16 ./Core/Src/i2c.o
  .debug_macro   0x00000000       0x16 ./Core/Src/i2c.o
  .debug_macro   0x00000000      0x146 ./Core/Src/i2c.o
- .debug_line    0x00000000      0xd1a ./Core/Src/i2c.o
- .debug_str     0x00000000    0xe8744 ./Core/Src/i2c.o
+ .debug_line    0x00000000      0xdc4 ./Core/Src/i2c.o
+ .debug_str     0x00000000    0xe88db ./Core/Src/i2c.o
  .comment       0x00000000       0x44 ./Core/Src/i2c.o
- .debug_frame   0x00000000      0x1b0 ./Core/Src/i2c.o
+ .debug_frame   0x00000000      0x1b4 ./Core/Src/i2c.o
  .ARM.attributes
                 0x00000000       0x34 ./Core/Src/i2c.o
  .group         0x00000000        0xc ./Core/Src/list.o

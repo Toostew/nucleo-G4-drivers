@@ -13,11 +13,12 @@
 #define I2C4_BASE_ADDR		0x40008400
 #define RCC_BASE_ADDR 		0x40021000
 #define GPIOB_BASE_ADDR		0x48000400
+#define GPIOC_BASE_ADDR		0x48000800
 
 #define RCC_APB1ENR 		(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x58UL)))	//for APB1 clock enable; for I2C1
 #define RCC_AHB2ENR			(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x4CUL)))	//for GPIOB
 #define RCC_CCIPR			(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x88UL)))	//for I2C1 clock source config
-
+#define RCC_CCIPR2			(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x9CUL)))	//for I2C4 clock source config
 
 
 
@@ -40,7 +41,7 @@
 #define I2C4_RXDR			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x24UL)))
 #define I2C4_TXDR			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x28UL)))
 
-
+//GPIOB
 #define GPIOB_MODER			(((volatile uint32_t *)(GPIOB_BASE_ADDR)))
 #define GPIOB_OTYPER		(*((volatile uint32_t *)(GPIOB_BASE_ADDR + 0x04UL)))
 #define GPIOB_OSPEEDR		(*((volatile uint32_t *)(GPIOB_BASE_ADDR + 0x08UL)))
@@ -48,7 +49,16 @@
 #define GPIOB_AFRL			(*((volatile uint32_t *)(GPIOB_BASE_ADDR + 0x20UL)))
 #define GPIOB_AFRH			(*((volatile uint32_t *)(GPIOB_BASE_ADDR + 0x24UL)))
 
-//configuration function for I2C
+//GPIOC
+#define GPIOC_MODER			(*((volatile uint32_t *)(GPIOC_BASE_ADDR)))
+#define GPIOC_OTYPER		(*((volatile uint32_t *)(GPIOC_BASE_ADDR + 0x04UL)))
+#define GPIOC_OSPEEDR		(*((volatile uint32_t *)(GPIOC_BASE_ADDR + 0x08UL)))
+#define GPIOC_PUPDR			(*((volatile uint32_t *)(GPIOC_BASE_ADDR + 0x0CUL)))
+#define GPIOC_AFRL			(*((volatile uint32_t *)(GPIOC_BASE_ADDR + 0x20UL))) //PC6 and PC7
+
+
+//configuration function for I2C1 and I2C4
+//I2C1 is
 void I2C_Configuration(){
 
 	//clock config
@@ -60,8 +70,34 @@ void I2C_Configuration(){
 	RCC_CCIPR &= ~(3 << 12);
 	RCC_CCIPR |= (2 << 12); //select HSI for clock source, 16 MHz
 
+	//change source clock for I2C4 to use HSI 16 MHz
+	RCC_CCIPR2	&= ~(0b11 << 0);
+	RCC_CCIPR2	|= (0b10 << 0); //HSI mode, 0b10 or 2
 
 
+	//GPIOC config
+	GPIOC_MODER	&= ~(3 << 12); //PC6
+	GPIOC_MODER	&= ~(3 << 14); //PC7
+	GPIOC_MODER	|= (0b10 << 12); // AF
+	GPIOC_MODER |= (0b10 << 14);
+
+	GPIOC_OTYPER |= (1 << 6); //PC6
+	GPIOC_OTYPER |= (1 << 7);
+
+	GPIOC_OSPEEDR &= ~(3 << 12); //PC6
+	GPIOC_OSPEEDR &= ~(3 << 14); //PC7
+	GPIOC_OSPEEDR |= (2 << 12); //High speed
+	GPIOC_OSPEEDR |= (2 << 14);
+
+	GPIOC_PUPDR	 &= ~(3 << 12); //PC6
+	GPIOC_PUPDR	 &= ~(3 << 14); //PC7
+	GPIOC_PUPDR	 |= (1 << 12); //pull-down
+	GPIOC_PUPDR	 |= (1 << 14);
+
+	GPIOC_AFRL	&= ~(0b1111 << 24); //PC6
+	GPIOC_AFRL	&= ~(0b1111 << 28); //PC7
+	GPIOC_AFRL	|= (0b1000 << 24); //AF8 I2C4_SCL
+	GPIOC_AFRL	|= (0b1000 << 28); //AF8 I2C4_SDA
 
 	//GPIOB config
 
@@ -95,12 +131,15 @@ void I2C_Configuration(){
 	GPIOB_AFRH	|= (4 << 0); //pin 8
 
 
-	//I2C Configuration
-	//disable I2C just in case
+	//I2C1 Configuration
+	//disable I2C1 just in case
 	I2C1_CR1 &= ~((1 << 0) | (1 << 14));
 
 	I2C1_TIMINGR = 0x00000000; //reset values to default
 
+	//these are the specific configs to get the clock to
+	//in order, PRESCALER, SCL Low oeriod, SCL High period,  Data setup time, Data hold time
+	//target is 100KHz
 	I2C1_TIMINGR |= ((0x3 << 28) | (0x13 << 0) | (0xF << 8) | (0x4 << 20) | (0x2 << 16));
 
 	//TXDMAEN enabled, turn on DMA transmussuib requests
@@ -108,6 +147,24 @@ void I2C_Configuration(){
 
 	//enable I2C
 	I2C1_CR1 |= (1 << 0);
+
+
+	//I2C4
+	//disable I2C4 just in case
+	I2C4_CR1 &= ~((1 << 0) | (1 << 14));
+
+	I2C4_TIMINGR = 0x00000000; //reset values to default
+	//these are the specific configs to get the clock to
+	//in order, PRESCALER, SCL Low oeriod, SCL High period,  Data setup time, Data hold time
+	//we copy exactly with I2C1 since we target 100KHz
+	I2C4_TIMINGR |= ((0x3 << 28) | (0x13 << 0) | (0xF << 8) | (0x4 << 20) | (0x2 << 16));
+
+	//TXDMAEN enabled, turn on DMA transmussuib requests
+	I2C4_CR1 |= (1 << 14); // disable if not using DMA
+
+	//enable I2C
+	I2C4_CR1 |= (1 << 0);
+
 
 }
 
