@@ -15,22 +15,96 @@
 #define RCC_BASE_ADDR 		0x40021000
 #define DMAMUX_BASE_ADDR	0x40020800
 #define I2C1_BASE_ADDR		0x40005400
+#define I2C4_BASE_ADDR		0x40008400
 
 
 #define RCC_AHB1ENR			(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x48UL)))
 
+//DMA channels 1-4
+#define DMA_CMAR1			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x14 + (0x14 * (1 - 1)))))
+#define DMA_CPAR1			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x10 + (0x14 * (1 - 1)))))
+#define DMA_CCR1			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x08 + (0x14 * (1 - 1)))))
+#define DMA_CNDTR1			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x0C + (0x14 * (1 - 1)))))
 
 #define DMA_CMAR2			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x14 + (0x14 * (2 - 1)))))
 #define DMA_CPAR2			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x10 + (0x14 * (2 - 1)))))
 #define DMA_CCR2			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x08 + (0x14 * (2 - 1)))))
 #define DMA_CNDTR2			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x0C + (0x14 * (2 - 1)))))
 
-#define DMAMUX_C1CR			(*((volatile uint32_t *)(DMAMUX_BASE_ADDR + (0x04 * 1)))) //for DMA1 channel 2
+#define DMA_CMAR3			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x14 + (0x14 * (3 - 1)))))
+#define DMA_CPAR3			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x10 + (0x14 * (3 - 1)))))
+#define DMA_CCR3			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x08 + (0x14 * (3 - 1)))))
+#define DMA_CNDTR3			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x0C + (0x14 * (3 - 1)))))
+
+#define DMA_CMAR4			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x14 + (0x14 * (4 - 1)))))
+#define DMA_CPAR4			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x10 + (0x14 * (4 - 1)))))
+#define DMA_CCR4			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x08 + (0x14 * (4 - 1)))))
+#define DMA_CNDTR4			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x0C + (0x14 * (4- 1)))))
+
+
+#define DMAMUX_C0CR			(*((volatile uint32_t *)(DMAMUX1_BASE_ADDR + (0x04 * 0)))) //DMA1 channel 1
+#define DMAMUX_C1CR			(*((volatile uint32_t *)(DMAMUX_BASE_ADDR + (0x04 * 1)))) //DMA1 channel 2
+#define DMAMUX_C2CR			(*((volatile uint32_t *)(DMAMUX_BASE_ADDR + (0x04 * 2)))) //DMA1 channel 3
+#define DMAMUX_C3CR			(*((volatile uint32_t *)(DMAMUX_BASE_ADDR + (0x04 * 3)))) //DMA1 channel 4
 
 
 //memory address without dereferencing
+//deprecated, old define we wont use
 #define I2C_TXDR			(((volatile uint32_t *)(I2C1_BASE_ADDR + 0x28UL))) //transmit memory address for I2C1
 #define I2C_CR2				(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x04UL)))
+
+
+#define I2C1_TXDR			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x28UL)))
+#define I2C1_CR2			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x04UL)))
+
+#define I2C4_TXDR			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x28UL)))
+#define I2C4_CR2			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x04UL)))
+
+
+
+//This is the DMA setup for BME280 and MPU6050
+//we need 2 different channels for the 2 I2C devices, in this case DMA1 Channel 1 and 2
+//in order to use them on this board we need to configure the DMAMUX to expect I2Cx traffic on DMA channels 1 and 2
+//since we are operating 2 I2C devices we need to input commands and output data, so 2x2 channels will be needed
+void dmaSetupSensorArray(void * DMA1_MemoryBuffer, void * DMA2_MemoryBuffer,
+						void * DMA3_MemoryBuffer, void * DMA4_MemoryBuffer){
+
+
+	//RCC, enable DMA1 and DMAMUX1 (despite the name there is only 1 DMAMUX)
+	RCC->AHB1ENR |= ((1 << 0) | (1 << 2));
+
+	//DMAMUX setup
+	//DMA channel 1 - 8 is mapped to DMAMUX channel 0 - 7
+	//DMA request IDs can be found at page 420 in RM0440
+	DMAMUX_C0CR & ~(0b1111111 << 0); //clear DMAREQ_ID reg
+	DMAMUX_C0CR |= (16 << 0); //DMA channel 1 is for I2C1 RX
+
+	DMAMUX_C1CR & ~(0b1111111 << 0); //clear DMAREQ_ID reg
+	DMAMUX_C1CR |= (17 << 0); //DMA channel 2 is for I2C1 TX
+
+	DMAMUX_C2CR & ~(0b1111111 << 0); //clear DMAREQ_ID reg
+	DMAMUX_C2CR |= (22 << 0); //DMA channel 3 is for I2C4 RX
+
+	DMAMUX_C3CR & ~(0b1111111 << 0); //clear DMAREQ_ID reg
+	DMAMUX_C3CR |= (23 << 0); //DMA channel 4 is for I2C4 TX
+
+	//DMA CMAR and CPAR
+	//CMAR is the memory buffer DMA will read and write to for data input and output
+	//CPAR is the address of the preipheral's transmit.
+	DMA_CMAR1 = (uint32_t *)(DMA1_MemoryBuffer);
+	DMA_CMAR2 = (uint32_t *)(DMA2_MemoryBuffer);
+	DMA_CMAR3 = (uint32_t *)(DMA3_MemoryBuffer);
+	DMA_CMAR4 = (uint32_t *)(DMA4_MemoryBuffer);
+
+
+}
+
+
+
+
+
+
+
 
 
 //this is the DMA setup for the OLED screen
