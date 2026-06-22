@@ -42,7 +42,7 @@
 #define DMA_CNDTR4			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x0C + (0x14 * (4- 1)))))
 
 
-#define DMAMUX_C0CR			(*((volatile uint32_t *)(DMAMUX1_BASE_ADDR + (0x04 * 0)))) //DMA1 channel 1
+#define DMAMUX_C0CR			(*((volatile uint32_t *)(DMAMUX_BASE_ADDR + (0x04 * 0)))) //DMA1 channel 1
 #define DMAMUX_C1CR			(*((volatile uint32_t *)(DMAMUX_BASE_ADDR + (0x04 * 1)))) //DMA1 channel 2
 #define DMAMUX_C2CR			(*((volatile uint32_t *)(DMAMUX_BASE_ADDR + (0x04 * 2)))) //DMA1 channel 3
 #define DMAMUX_C3CR			(*((volatile uint32_t *)(DMAMUX_BASE_ADDR + (0x04 * 3)))) //DMA1 channel 4
@@ -55,9 +55,11 @@
 
 
 #define I2C1_TXDR			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x28UL)))
+#define I2C1_RXDR			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x24UL)))
 #define I2C1_CR2			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x04UL)))
 
 #define I2C4_TXDR			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x28UL)))
+#define I2C4_RXDR			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x24UL)))
 #define I2C4_CR2			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x04UL)))
 
 
@@ -66,8 +68,9 @@
 //we need 2 different channels for the 2 I2C devices, in this case DMA1 Channel 1 and 2
 //in order to use them on this board we need to configure the DMAMUX to expect I2Cx traffic on DMA channels 1 and 2
 //since we are operating 2 I2C devices we need to input commands and output data, so 2x2 channels will be needed
-void dmaSetupSensorArray(void * DMA1_MemoryBuffer, void * DMA2_MemoryBuffer,
-						void * DMA3_MemoryBuffer, void * DMA4_MemoryBuffer){
+//RUN THIS BEFORE THE OTHER I2C1 and I2C4 PERIPHERAL TEST!!!!!!!!!!!!!!!!
+void dmaSetupSensorArray(uint32_t DMA1_MemoryBuffer, uint32_t DMA2_MemoryBuffer,
+						uint32_t DMA3_MemoryBuffer, uint32_t DMA4_MemoryBuffer){
 
 
 	//RCC, enable DMA1 and DMAMUX1 (despite the name there is only 1 DMAMUX)
@@ -76,30 +79,61 @@ void dmaSetupSensorArray(void * DMA1_MemoryBuffer, void * DMA2_MemoryBuffer,
 	//DMAMUX setup
 	//DMA channel 1 - 8 is mapped to DMAMUX channel 0 - 7
 	//DMA request IDs can be found at page 420 in RM0440
-	DMAMUX_C0CR & ~(0b1111111 << 0); //clear DMAREQ_ID reg
+	DMAMUX_C0CR &= ~(0b1111111 << 0); //clear DMAREQ_ID reg
 	DMAMUX_C0CR |= (16 << 0); //DMA channel 1 is for I2C1 RX
 
-	DMAMUX_C1CR & ~(0b1111111 << 0); //clear DMAREQ_ID reg
+	DMAMUX_C1CR &= ~(0b1111111 << 0); //clear DMAREQ_ID reg
 	DMAMUX_C1CR |= (17 << 0); //DMA channel 2 is for I2C1 TX
 
-	DMAMUX_C2CR & ~(0b1111111 << 0); //clear DMAREQ_ID reg
+	DMAMUX_C2CR &= ~(0b1111111 << 0); //clear DMAREQ_ID reg
 	DMAMUX_C2CR |= (22 << 0); //DMA channel 3 is for I2C4 RX
 
-	DMAMUX_C3CR & ~(0b1111111 << 0); //clear DMAREQ_ID reg
+	DMAMUX_C3CR &= ~(0b1111111 << 0); //clear DMAREQ_ID reg
 	DMAMUX_C3CR |= (23 << 0); //DMA channel 4 is for I2C4 TX
 
 	//DMA CMAR and CPAR
 	//CMAR is the memory buffer DMA will read and write to for data input and output
-	//CPAR is the address of the preipheral's transmit.
-	DMA_CMAR1 = (uint32_t *)(DMA1_MemoryBuffer);
-	DMA_CMAR2 = (uint32_t *)(DMA2_MemoryBuffer);
-	DMA_CMAR3 = (uint32_t *)(DMA3_MemoryBuffer);
-	DMA_CMAR4 = (uint32_t *)(DMA4_MemoryBuffer);
+	//CPAR is the address of the peripheral's transfer/receive reg. Specify in DMA_CCRx
+	DMA_CMAR1 = (DMA1_MemoryBuffer);
+	DMA_CMAR2 = (DMA2_MemoryBuffer);
+	DMA_CMAR3 = (DMA3_MemoryBuffer);
+	DMA_CMAR4 = (DMA4_MemoryBuffer);
 
+	//CPAR setup, for I2C RX and TX
+	DMA_CPAR1 = (uint32_t)(I2C1_RXDR);
+	DMA_CPAR2 = (uint32_t)(I2C1_TXDR);
+	DMA_CPAR3 = (uint32_t)(I2C4_RXDR);
+	DMA_CPAR4 = (uint32_t)(I2C4_TXDR);
+
+
+	DMA_CCR1 = ((1 << 7) | (0 << 4)); //I2C1 rx
+	DMA_CCR2 = ((1 << 7) | (1 << 4)); //I2C1 tx
+	DMA_CCR3 = ((1 << 7) | (0 << 4)); //I2C4 rx
+	DMA_CCR4 = ((1 << 7) | (1 << 4)); //I2C4 tx
+
+}
+
+void setupMPU_6050(){
 
 }
 
 
+
+void testMPU_6050(){
+
+}
+
+
+
+
+
+
+//transmit based on CMAR location
+void transmitI2C(){
+
+
+
+}
 
 
 

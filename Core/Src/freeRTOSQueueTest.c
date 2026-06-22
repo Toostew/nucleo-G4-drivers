@@ -22,21 +22,6 @@ void rtos_task_setup(){
 		UARTParameter_Config.UARTQueue = xUARTQueue;
 
 
-	  xTaskCreate(
-			  toggleLED1, //the function that implements this task
-			  "LED_PB1", //the name of this task
-			  128, // stack depth, or size of stack in words, so 128 x 4 bytes per word, that's 512 bytes
-			  NULL, //task parameters, null means this task doesnt need anymore outside data
-			  1, //task priority, higher priority will allow it to cut in line for CPU time and maintain it
-			  NULL); //reference handle
-
-	  xTaskCreate(
-			  toggleLED2,
-			  "LED_PB2",
-			  128,
-			  (void *)&UARTParameter_Config,
-			  1,
-			  NULL);
 
 	  xTaskCreate(
 			  UARTsendData,

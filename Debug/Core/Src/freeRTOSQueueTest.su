@@ -1,4 +1,4 @@
 ../Core/Src/freeRTOSQueueTest.c:14:6:rtos_task_setup	24	static
-../Core/Src/freeRTOSQueueTest.c:51:6:toggleLED1	16	static
-../Core/Src/freeRTOSQueueTest.c:60:6:toggleLED2	24	static
-../Core/Src/freeRTOSQueueTest.c:79:6:UARTsendData	24	static
+../Core/Src/freeRTOSQueueTest.c:36:6:toggleLED1	16	static
+../Core/Src/freeRTOSQueueTest.c:45:6:toggleLED2	24	static
+../Core/Src/freeRTOSQueueTest.c:64:6:UARTsendData	24	static

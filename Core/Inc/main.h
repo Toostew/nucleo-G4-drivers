@@ -26,6 +26,11 @@
 extern "C" {
 #endif
 
+int main();
+void testTask(void *pvParameters);
+void testTaskTwo(void * pvParameters);
+
+
 /* Includes ------------------------------------------------------------------*/
 #include "stm32g4xx_hal.h"
 

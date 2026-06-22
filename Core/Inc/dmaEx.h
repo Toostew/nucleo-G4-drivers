@@ -14,6 +14,9 @@
 #include "stm32g4xx_nucleo.h"
 #include <stdio.h>
 
+
+void dmaSetupSensorArray(uint32_t DMA1_MemoryBuffer, uint32_t DMA2_MemoryBuffer,
+						uint32_t DMA3_MemoryBuffer, uint32_t DMA4_MemoryBuffer);
 void dmaSetupOLED();
 void transmitOLED(uint8_t* arrayPointer, uint16_t numberOfBytes);
 

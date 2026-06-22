@@ -16,6 +16,7 @@
 #define GPIOC_BASE_ADDR		0x48000800
 
 #define RCC_APB1ENR 		(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x58UL)))	//for APB1 clock enable; for I2C1
+#define RCC_APB1ENR2		(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x5CUL)))	//for I2C4 clock enable
 #define RCC_AHB2ENR			(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x4CUL)))	//for GPIOB
 #define RCC_CCIPR			(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x88UL)))	//for I2C1 clock source config
 #define RCC_CCIPR2			(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x9CUL)))	//for I2C4 clock source config
@@ -64,6 +65,7 @@ void I2C_Configuration(){
 	//clock config
 	//enable clocks
 	RCC_APB1ENR |= (1 << 21);
+	RCC_APB1ENR2 |= (1 << 1); //turn on I2C4 DUMBASS!!!!!!!!!!!!!!!!!
 	RCC_AHB2ENR |= (1 << 1);
 
 	//change source clock for I2C1 to use HSI, 16 MHZ. makes my life easier
@@ -126,9 +128,9 @@ void I2C_Configuration(){
 
 	//AFR L and H setup (L for pin 7, H for pin 8)
 	GPIOB_AFRL	&= ~(15 << 28);
-	GPIOB_AFRL	|= (4 << 28); //pin 7
+	GPIOB_AFRL	|= (4 << 28); //pin B7
 	GPIOB_AFRH	&= ~(15 << 0);
-	GPIOB_AFRH	|= (4 << 0); //pin 8
+	GPIOB_AFRH	|= (4 << 0); //pin B8
 
 
 	//I2C1 Configuration
@@ -168,8 +170,9 @@ void I2C_Configuration(){
 
 }
 
-//we will read the WHOAMI address on the mpu 6050
-uint32_t pingSensorTest(){
+//we will read the WHOAMI address on the BME280
+//slave address for BME is 0x76, WHOAMI = 0x68
+uint32_t bmeTest(){
 
 	//clear Bus Error, NACK, STOP flag registers, these are event flags and are sticky, need to reset manually
 	I2C1_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
@@ -181,13 +184,13 @@ uint32_t pingSensorTest(){
 	I2C1_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
 
 	//set number of bytes, START, write mode, and target address
-	I2C1_CR2 = ((1 << 16)  | (0 << 10) | (0x68 << 1));
+	I2C1_CR2 = ((1 << 16)  | (0 << 10) | (0x76 << 1));
 
 	I2C1_CR2 |= (1 << 13); //enable start bit
 
-	while(!txisEmpty()){
+	while(!I2C1_TxIsEmpty()){
 		//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
-		if(nackFlagDetected()){
+		if(I2C1_NackFlagDetected()){
 
 			//generate a stop to end the transmission early
 			I2C1_CR2 = (1 << 14);
@@ -199,27 +202,85 @@ uint32_t pingSensorTest(){
 		}
 	} //wait for transmit data register is empty
 
-	I2C1_TXDR = 0x75;
+	I2C1_TXDR = 0xD0;
 
-	while(!transferComplete());
+	while(!I2C1_TransferComplete());
 
 	//listen phase
 	//number of bytes, start and target address dont need to change, but rewrite for redundancy
 	//set start bit LAST
 	I2C1_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
 
-	I2C1_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (0x68 << 1));
+	I2C1_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (0x76 << 1));
 
 	I2C1_CR2 |= (1 << 13); //enable start bit
 
-	while(!rxNotEmpty()); //hold until RX is empty
+	while(!I2C1_RXNotEmpty()); //hold until RX is empty
 	uint32_t data = I2C1_RXDR;
 
 
 	//use stop flags as more like milestones and not actual conditionals to dictate logics directly
-	while(!stopFlagDetected());
+	while(!I2C1_StopFlagDetected());
 
 	I2C1_ICR |= (1 << 5);
+
+
+	return data;
+}
+
+//we will read the WHOAMI address on the MPU6050
+//slave address for BME is 0x76, WHOAMI = 0x68
+uint32_t mpuTest(){
+
+	//clear Bus Error, NACK, STOP flag registers, these are event flags and are sticky, need to reset manually
+	I2C4_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
+
+
+	//first message for read
+	//CR2 setup
+	//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
+	I2C4_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+	//set number of bytes, START, write mode, and target address
+	I2C4_CR2 = ((1 << 16)  | (0 << 10) | (0x68 << 1));
+
+	I2C4_CR2 |= (1 << 13); //enable start bit
+
+	while(!I2C4_TxIsEmpty()){
+		//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+		if(I2C4_NackFlagDetected()){
+
+			//generate a stop to end the transmission early
+			I2C4_CR2 = (1 << 14);
+
+			//clear nack flag
+			I2C4_ICR = (1 << 4);
+
+			return 0xFFFFFFFF;
+		}
+	} //wait for transmit data register is empty
+
+	I2C4_TXDR = 0x75;
+
+	while(!I2C4_TransferComplete());
+
+	//listen phase
+	//number of bytes, start and target address dont need to change, but rewrite for redundancy
+	//set start bit LAST
+	I2C4_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+	I2C4_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (0x68 << 1));
+
+	I2C4_CR2 |= (1 << 13); //enable start bit
+
+	while(!I2C4_RXNotEmpty()); //hold until RX is empty
+	uint32_t data = I2C4_RXDR;
+
+
+	//use stop flags as more like milestones and not actual conditionals to dictate logics directly
+	while(!I2C4_StopFlagDetected());
+
+	I2C4_ICR |= (1 << 5);
 
 
 	return data;
@@ -241,27 +302,27 @@ void toggleDisplay(){
     I2C1_CR2 |= (1 << 13);
 
     // first byte is control byte, 0x00
-    while(!txisEmpty()) { if(nackFlagDetected()) { goto handle_nack; } }
+    while(!I2C1_TxIsEmpty()) { if(I2C1_NackFlagDetected()) { goto handle_nack; } }
     I2C1_TXDR = 0x00;
 
     //second byte is CHARGE PUMP, 0x8D
-    while(!txisEmpty()) { if(nackFlagDetected()) { goto handle_nack; } }
+    while(!I2C1_TxIsEmpty()) { if(I2C1_NackFlagDetected()) { goto handle_nack; } }
     I2C1_TXDR = 0x8D;
 
     //third byte is enable charge pump, 0x14
-    while(!txisEmpty()) { if(nackFlagDetected()) { goto handle_nack; } }
+    while(!I2C1_TxIsEmpty()) { if(I2C1_NackFlagDetected()) { goto handle_nack; } }
     I2C1_TXDR = 0x14;
 
     //fourth byte is turn on whole screen, 0xA5
-    while(!txisEmpty()) { if(nackFlagDetected()) { goto handle_nack; } }
+    while(!I2C1_TxIsEmpty()) { if(I2C1_NackFlagDetected()) { goto handle_nack; } }
     I2C1_TXDR = 0xA5;
 
     //5th byte is all pixels on, 0xAF
-    while(!txisEmpty()) { if(nackFlagDetected()) { goto handle_nack; } }
+    while(!I2C1_TxIsEmpty()) { if(I2C1_NackFlagDetected()) { goto handle_nack; } }
     I2C1_TXDR = 0xAF;
 
     //Wait for Auto-End to generate the STOP condition safely
-    while(!stopFlagDetected());
+    while(!I2C1_StopFlagDetected());
     I2C1_ICR |= (1 << 5); // Clear stop flag
     return;
 
@@ -292,14 +353,14 @@ void sendOLEDCommand(uint8_t cmd) {
     I2C1_CR2 |= (1 << 13); // START
 
     // Byte 1: Control Byte (0x00 means next byte is a command)
-    while(!txisEmpty());
+    while(!I2C1_TxIsEmpty());
     I2C1_TXDR = 0x00;
 
     // Byte 2: The actual command
-    while(!txisEmpty());
+    while(!I2C1_TxIsEmpty());
     I2C1_TXDR = cmd;
 
-    while(!stopFlagDetected());
+    while(!I2C1_StopFlagDetected());
     I2C1_ICR |= (1 << 5); // Clear STOP
 }
 
@@ -313,14 +374,14 @@ void testDisplayOn() {
 
 
 //return 1 if Busy
-int checkBusyRegister(){
+int I2C1_CheckBusyRegister(){
 	if(I2C1_ISR & (1 << 15)){
 		return 1;
 	}
 	return 0;
 }
 
-int transferComplete(){
+int I2C1_TransferComplete(){
 	if(I2C1_ISR & (1 << 6)){
 		return 1;
 	}
@@ -328,7 +389,7 @@ int transferComplete(){
 }
 
 //STOPF triggered
-int stopFlagDetected(){
+int I2C1_StopFlagDetected(){
 	if(I2C1_ISR & (1 << 5)){
 		return 1;
 	}
@@ -336,7 +397,7 @@ int stopFlagDetected(){
 }
 
 //NACK received flag
-int nackFlagDetected(){
+int I2C1_NackFlagDetected(){
 	if(I2C1_ISR & (1 << 4)){
 		return 1;
 	}
@@ -344,30 +405,75 @@ int nackFlagDetected(){
 }
 
 //RX not empty; 1 for empty, 0 for filled
-int rxNotEmpty(){
+int I2C1_RXNotEmpty(){
 	if(I2C1_ISR & (1 << 2)){
 		return 1;
 	}
 	return 0;
 }
 
-//TX empty
-int txEmpty(){
-	if(I2C1_ISR & (1 << 0)){
-		return 1;
-	}
-	return 0;
-}
 
 
 //transmit interrupt status
 //is 1 if TXDR is empty, ready for next byte or end
-int txisEmpty(){
+int I2C1_TxIsEmpty(){
 	if(I2C1_ISR & (1 << 1)){
 		return 1;
 	}
 	return 0;
 }
+
+//I2C4 variants
+//return 1 if Busy
+int I2C4_CheckBusyRegister(){
+	if(I2C4_ISR & (1 << 15)){
+		return 1;
+	}
+	return 0;
+}
+
+int I2C4_TransferComplete(){
+	if(I2C4_ISR & (1 << 6)){
+		return 1;
+	}
+	return 0;
+}
+
+//STOPF triggered
+int I2C4_StopFlagDetected(){
+	if(I2C4_ISR & (1 << 5)){
+		return 1;
+	}
+	return 0;
+}
+
+//NACK received flag
+int I2C4_NackFlagDetected(){
+	if(I2C4_ISR & (1 << 4)){
+		return 1;
+	}
+	return 0;
+}
+
+//RX not empty; 1 for empty, 0 for filled
+int I2C4_RXNotEmpty(){
+	if(I2C4_ISR & (1 << 2)){
+		return 1;
+	}
+	return 0;
+}
+
+
+
+//transmit interrupt status
+//is 1 if TXDR is empty, ready for next byte or end
+int I2C4_TxIsEmpty(){
+	if(I2C4_ISR & (1 << 1)){
+		return 1;
+	}
+	return 0;
+}
+
 
 //incase of bus problems
 int busError(){

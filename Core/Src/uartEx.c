@@ -82,7 +82,7 @@ void uartPinConfig(){
 
 	USART_CR1 |= (1 << 0); //UE: USART ENABLE.
 
-	//PIN SETUP
+	//PB1 and 2 setup for GPIO, this clashes with setup in freeRTOSSemaphore where one is used as input instead
 	//0b is binary, 0x is hex
 	GPIOB_MODER &= ~(0b11 << 2); //pb1
 	GPIOB_MODER &= ~(0b11 << 4); //pb2

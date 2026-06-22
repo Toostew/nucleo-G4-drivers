@@ -116,12 +116,27 @@ int main(void)
     Error_Handler();
   }
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+
+  xTaskCreate(
+  			  testTask, //the function that implements this task
+  			  "test_task", //the name of this task
+  			  128, // stack depth, or size of stack in words, so 128 x 4 bytes per word, that's 512 bytes
+  			  NULL, //task parameters, null means this task doesnt need anymore outside data
+  			  1, //task priority, higher priority will allow it to cut in line for CPU time and maintain it
+  			  NULL); //reference handle
+
+  xTaskCreate(
+		  	  testTaskTwo, //the function that implements this task
+			  "test_task_two", //the name of this task
+			  128, // stack depth, or size of stack in words, so 128 x 4 bytes per word, that's 512 bytes
+			  NULL, //task parameters, null means this task doesnt need anymore outside data
+			  1, //task priority, higher priority will allow it to cut in line for CPU time and maintain it
+    		  NULL); //reference handle
+
+  I2C_Configuration();
   uartPinConfig();
   rtos_task_setup();
   pinConfig();
-  semaphoreConfig();
 
 
   //when this is called the scheduler officially takes over. Ideally nothing past this point gets run
@@ -130,6 +145,25 @@ int main(void)
   while (1); // this doesnt actually run
 
   /* USER CODE END 3 */
+}
+
+//ping BME280 once every second, should return 0x60 from 0xD0 register at slave address 0x76
+void testTask(void * pvParameters){
+	//same as while(1)
+	for(;;){
+		print_hex(bmeTest());
+		vTaskDelay(1000); //
+	}
+
+}
+
+//ping MPU6050 once every second, should return 0x68 from 0x75 register at slave address 0x68
+void testTaskTwo(void * pvParameters){
+
+	for(;;){
+		print_hex(mpuTest());
+		vTaskDelay(1000);
+	}
 }
 
 /**
