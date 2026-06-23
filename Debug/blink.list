@@ -27,25 +27,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  00008024  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00016324  00000000  00000000  00008054  2**0
+ 12 .debug_info   000163ac  00000000  00000000  00008054  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 0000359e  00000000  00000000  0001e378  2**0
+ 13 .debug_abbrev 000035e6  00000000  00000000  0001e400  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 000013f8  00000000  00000000  00021918  2**3
+ 14 .debug_aranges 00001408  00000000  00000000  000219e8  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_rnglists 00000f68  00000000  00000000  00022d10  2**0
+ 15 .debug_rnglists 00000f76  00000000  00000000  00022df0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  00005e4b  00000000  00000000  00023c78  2**0
+ 16 .debug_macro  00005e57  00000000  00000000  00023d66  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00019540  00000000  00000000  00029ac3  2**0
+ 17 .debug_line   000197b6  00000000  00000000  00029bbd  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000fe1d2  00000000  00000000  00043003  2**0
+ 18 .debug_str    000fe236  00000000  00000000  00043373  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  001411d5  2**0
+ 19 .comment      00000043  00000000  00000000  001415a9  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00004ce8  00000000  00000000  00141218  2**2
+ 20 .debug_frame  00004d28  00000000  00000000  001415ec  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000047  00000000  00000000  00145f00  2**0
+ 21 .debug_line_str 00000047  00000000  00000000  00146314  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1958,6 +1958,8 @@ void I2C_Configuration(){
  8000eb8:	40008400 	.word	0x40008400
 
 08000ebc <bmeTest>:
+}
+
 
 //we will read the WHOAMI address on the BME280
 //slave address for BME is 0x76, WHOAMI = 0x68
@@ -1977,17 +1979,17 @@ uint32_t bmeTest(){
 
 	//first message for read
 	//CR2 setup
-	//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
-	I2C1_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+	//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN,
+	I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
  8000ece:	4b2e      	ldr	r3, [pc, #184]	@ (8000f88 <bmeTest+0xcc>)
  8000ed0:	681b      	ldr	r3, [r3, #0]
  8000ed2:	4a2d      	ldr	r2, [pc, #180]	@ (8000f88 <bmeTest+0xcc>)
- 8000ed4:	f023 7300 	bic.w	r3, r3, #33554432	@ 0x2000000
- 8000ed8:	f423 33b6 	bic.w	r3, r3, #93184	@ 0x16c00
+ 8000ed4:	f023 733f 	bic.w	r3, r3, #50069504	@ 0x2fc0000
+ 8000ed8:	f423 335b 	bic.w	r3, r3, #224256	@ 0x36c00
  8000edc:	6013      	str	r3, [r2, #0]
 
 	//set number of bytes, START, write mode, and target address
-	I2C1_CR2 = ((1 << 16)  | (0 << 10) | (0x76 << 1));
+	I2C1_CR2 = ((1 << 16)  | (0 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
  8000ede:	4b2a      	ldr	r3, [pc, #168]	@ (8000f88 <bmeTest+0xcc>)
  8000ee0:	4a2a      	ldr	r2, [pc, #168]	@ (8000f8c <bmeTest+0xd0>)
  8000ee2:	601a      	str	r2, [r3, #0]
@@ -2046,15 +2048,15 @@ uint32_t bmeTest(){
 	//listen phase
 	//number of bytes, start and target address dont need to change, but rewrite for redundancy
 	//set start bit LAST
-	I2C1_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+	I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
  8000f2c:	4b16      	ldr	r3, [pc, #88]	@ (8000f88 <bmeTest+0xcc>)
  8000f2e:	681b      	ldr	r3, [r3, #0]
  8000f30:	4a15      	ldr	r2, [pc, #84]	@ (8000f88 <bmeTest+0xcc>)
- 8000f32:	f023 7300 	bic.w	r3, r3, #33554432	@ 0x2000000
- 8000f36:	f423 33b6 	bic.w	r3, r3, #93184	@ 0x16c00
+ 8000f32:	f023 733f 	bic.w	r3, r3, #50069504	@ 0x2fc0000
+ 8000f36:	f423 335b 	bic.w	r3, r3, #224256	@ 0x36c00
  8000f3a:	6013      	str	r3, [r2, #0]
 
-	I2C1_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (0x76 << 1));
+	I2C1_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
  8000f3c:	4b12      	ldr	r3, [pc, #72]	@ (8000f88 <bmeTest+0xcc>)
  8000f3e:	4a15      	ldr	r2, [pc, #84]	@ (8000f94 <bmeTest+0xd8>)
  8000f40:	601a      	str	r2, [r3, #0]
@@ -2130,16 +2132,16 @@ uint32_t mpuTest(){
 	//first message for read
 	//CR2 setup
 	//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
-	I2C4_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+	I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
  8000fae:	4b2e      	ldr	r3, [pc, #184]	@ (8001068 <mpuTest+0xcc>)
  8000fb0:	681b      	ldr	r3, [r3, #0]
  8000fb2:	4a2d      	ldr	r2, [pc, #180]	@ (8001068 <mpuTest+0xcc>)
- 8000fb4:	f023 7300 	bic.w	r3, r3, #33554432	@ 0x2000000
- 8000fb8:	f423 33b6 	bic.w	r3, r3, #93184	@ 0x16c00
+ 8000fb4:	f023 733f 	bic.w	r3, r3, #50069504	@ 0x2fc0000
+ 8000fb8:	f423 335b 	bic.w	r3, r3, #224256	@ 0x36c00
  8000fbc:	6013      	str	r3, [r2, #0]
 
 	//set number of bytes, START, write mode, and target address
-	I2C4_CR2 = ((1 << 16)  | (0 << 10) | (0x68 << 1));
+	I2C4_CR2 = ((1 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
  8000fbe:	4b2a      	ldr	r3, [pc, #168]	@ (8001068 <mpuTest+0xcc>)
  8000fc0:	4a2a      	ldr	r2, [pc, #168]	@ (800106c <mpuTest+0xd0>)
  8000fc2:	601a      	str	r2, [r3, #0]
@@ -2206,7 +2208,7 @@ uint32_t mpuTest(){
  8001016:	f423 33b6 	bic.w	r3, r3, #93184	@ 0x16c00
  800101a:	6013      	str	r3, [r2, #0]
 
-	I2C4_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (0x68 << 1));
+	I2C4_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
  800101c:	4b12      	ldr	r3, [pc, #72]	@ (8001068 <mpuTest+0xcc>)
  800101e:	4a15      	ldr	r2, [pc, #84]	@ (8001074 <mpuTest+0xd8>)
  8001020:	601a      	str	r2, [r3, #0]

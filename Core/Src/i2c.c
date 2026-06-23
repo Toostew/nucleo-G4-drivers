@@ -14,6 +14,9 @@
 #define RCC_BASE_ADDR 		0x40021000
 #define GPIOB_BASE_ADDR		0x48000400
 #define GPIOC_BASE_ADDR		0x48000800
+#define MPU6050_SLAVE_ADDR	0x68
+#define BME280_SLAVE_ADDR	0x76
+
 
 #define RCC_APB1ENR 		(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x58UL)))	//for APB1 clock enable; for I2C1
 #define RCC_APB1ENR2		(*((volatile uint32_t *)(RCC_BASE_ADDR + 0x5CUL)))	//for I2C4 clock enable
@@ -170,6 +173,133 @@ void I2C_Configuration(){
 
 }
 
+//generic read operator
+uint32_t I2C_read(uint8_t slaveAddress, uint8_t targetRegister, int device){
+
+	//device number dictates operation
+	//MPU6050
+	if(device == 0){
+		//clear flags
+		I2C4_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
+
+		//first message for read
+		//CR2 setup
+		//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
+		I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+		//set number of bytes, START, write mode, and target address
+		I2C4_CR2 = ((1 << 16)  | (0 << 10) | (((uint32_t)(slaveAddress)) << 1));
+
+		I2C4_CR2 |= (1 << 13); //enable start bit
+
+		while(!I2C4_TxIsEmpty()){
+			//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+			if(I2C4_NackFlagDetected()){
+
+				//generate a stop to end the transmission early
+				I2C4_CR2 = (1 << 14);
+
+				//clear nack flag
+				I2C4_ICR = (1 << 4);
+
+				return 0xFFFFFFFF;
+			}
+		} //wait for transmit data register is empty
+
+		I2C4_TXDR = (uint32_t)targetRegister;
+
+		while(!I2C4_TransferComplete());
+
+		//listen phase
+		//number of bytes, start and target address dont need to change, but rewrite for redundancy
+		//set start bit LAST
+		I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+		//bit 10 = 1, read operation.
+		I2C4_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (((uint32_t)(slaveAddress)) << 1));
+
+		I2C4_CR2 |= (1 << 13); //enable start bit
+
+		while(!I2C4_RXNotEmpty()); //hold until RX is empty
+		uint32_t data = I2C4_RXDR; //the register is already 32 bits no need to type cast
+
+
+		//use stop flags as more like milestones and not actual conditionals to dictate logics directly
+		while(!I2C4_StopFlagDetected());
+
+		I2C4_ICR |= (1 << 5);
+
+
+		return data;
+
+
+	}
+	//BME280
+	else if(device == 1){
+
+		//clear Bus Error, NACK, STOP flag registers, these are event flags and are sticky, need to reset manually
+		I2C1_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
+
+
+		//first message for read
+		//CR2 setup
+		//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN,
+		I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+		//set number of bytes, START, write mode, and target address
+		I2C1_CR2 = ((1 << 16)  | (0 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
+
+		I2C1_CR2 |= (1 << 13); //enable start bit
+
+		while(!I2C1_TxIsEmpty()){
+			//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+			if(I2C1_NackFlagDetected()){
+
+				//generate a stop to end the transmission early
+				I2C1_CR2 = (1 << 14);
+
+				//clear nack flag
+				I2C1_ICR = (1 << 4);
+
+				return 0xFFFFFFFF;
+			}
+		} //wait for transmit data register is empty
+
+		I2C1_TXDR = (uint32_t)(targetRegister);
+
+		while(!I2C1_TransferComplete());
+
+		//listen phase
+		//number of bytes, start and target address dont need to change, but rewrite for redundancy
+		//set start bit LAST
+		I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+		I2C1_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
+
+		I2C1_CR2 |= (1 << 13); //enable start bit
+
+		while(!I2C1_RXNotEmpty()); //hold until RX is empty
+		uint32_t data = I2C1_RXDR;
+
+
+		//use stop flags as more like milestones and not actual conditionals to dictate logics directly
+		while(!I2C1_StopFlagDetected());
+
+		I2C1_ICR |= (1 << 5);
+
+
+		return data;
+
+
+
+
+
+	}
+	return 0xFFFFFFFF; //undefined
+
+}
+
+
 //we will read the WHOAMI address on the BME280
 //slave address for BME is 0x76, WHOAMI = 0x68
 uint32_t bmeTest(){
@@ -180,11 +310,11 @@ uint32_t bmeTest(){
 
 	//first message for read
 	//CR2 setup
-	//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
-	I2C1_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+	//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN,
+	I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
 
 	//set number of bytes, START, write mode, and target address
-	I2C1_CR2 = ((1 << 16)  | (0 << 10) | (0x76 << 1));
+	I2C1_CR2 = ((1 << 16)  | (0 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
 
 	I2C1_CR2 |= (1 << 13); //enable start bit
 
@@ -209,9 +339,9 @@ uint32_t bmeTest(){
 	//listen phase
 	//number of bytes, start and target address dont need to change, but rewrite for redundancy
 	//set start bit LAST
-	I2C1_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+	I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
 
-	I2C1_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (0x76 << 1));
+	I2C1_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
 
 	I2C1_CR2 |= (1 << 13); //enable start bit
 
@@ -239,10 +369,10 @@ uint32_t mpuTest(){
 	//first message for read
 	//CR2 setup
 	//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
-	I2C4_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+	I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
 
 	//set number of bytes, START, write mode, and target address
-	I2C4_CR2 = ((1 << 16)  | (0 << 10) | (0x68 << 1));
+	I2C4_CR2 = ((1 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
 
 	I2C4_CR2 |= (1 << 13); //enable start bit
 
@@ -269,7 +399,7 @@ uint32_t mpuTest(){
 	//set start bit LAST
 	I2C4_CR2 &= ~((1 << 25) | (1 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
 
-	I2C4_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (0x68 << 1));
+	I2C4_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
 
 	I2C4_CR2 |= (1 << 13); //enable start bit
 
@@ -284,6 +414,103 @@ uint32_t mpuTest(){
 
 
 	return data;
+}
+
+
+//initial setup for the MPU6050, including wake up, init and such
+//the register order is power > config(gyro/accel) > read data registers
+//RUN THIS AFTER i2C INIT BUT BEFORE ACTUALLY USING I2C
+void mpuSetup(){
+	//turn on the MPU by setting the SLEEP register to 0 at 0x6B
+	//TODO: abstract writing operations into a single function bruh you can't keep writing ts
+
+
+	I2C4_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
+
+	//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
+	I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+	//set number of bytes, START, write mode, and target address
+	I2C4_CR2 = ((2 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
+
+	I2C4_CR2 |= (1 << 13); //enable start bit
+
+	while(!I2C4_TxIsEmpty()){
+			//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+			if(I2C4_NackFlagDetected()){
+
+				//generate a stop to end the transmission early
+				I2C4_CR2 = (1 << 14);
+
+				//clear nack flag
+				I2C4_ICR = (1 << 4);
+
+				return;
+			}
+	} //wait for transmit data register is empty
+
+	I2C4_TXDR = 0x6B; //Address of power management 1 register
+
+	while(!I2C4_TxIsEmpty()){
+			//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+			if(I2C4_NackFlagDetected()){
+
+				//generate a stop to end the transmission early
+				I2C4_CR2 = (1 << 14);
+
+				//clear nack flag
+				I2C4_ICR = (1 << 4);
+
+				return;
+			}
+	} //wait for transmit data register is empty
+	I2C4_TXDR = 0b00000001; //turn off SLEEP at bit 6, set CLKSEL to mode 1 at bit 2:0
+
+	//first AUTOENDs here
+	//resend another frame
+	//TODO:abstract ts pls
+	I2C4_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
+
+	//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
+	I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+	//set number of bytes, START, write mode, and target address
+	I2C4_CR2 = ((2 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
+
+	I2C4_CR2 |= (1 << 13); //enable start bit
+
+	while(!I2C4_TxIsEmpty()){
+			//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+			if(I2C4_NackFlagDetected()){
+
+				//generate a stop to end the transmission early
+				I2C4_CR2 = (1 << 14);
+
+				//clear nack flag
+				I2C4_ICR = (1 << 4);
+
+				return;
+			}
+	} //wait for transmit data register is empty
+
+	I2C4_TXDR = 0x1B; //Address of GYRO config
+
+	while(!I2C4_TxIsEmpty()){
+			//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+			if(I2C4_NackFlagDetected()){
+
+				//generate a stop to end the transmission early
+				I2C4_CR2 = (1 << 14);
+
+				//clear nack flag
+				I2C4_ICR = (1 << 4);
+
+				return;
+			}
+	} //wait for transmit data register is empty
+	I2C4_TXDR = 0b00000001; //turn off SLEEP at bit 6, set CLKSEL to mode 1 at bit 2:0
+
+
 }
 
 
