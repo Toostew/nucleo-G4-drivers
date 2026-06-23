@@ -300,6 +300,111 @@ uint32_t I2C_read(uint8_t slaveAddress, uint8_t targetRegister, int device){
 }
 
 
+//generic I2C write,
+//accepts pointer to uint8_t array (dont use char), and size_t (for keeping track of size of something in bytes)
+//returns int, as in either fail or success
+int I2C_write(uint8_t data, int device, uint8_t targetRegister){
+	//TODO: for now only accepts one byte, make it so that it can handle continuous byte writes
+
+	//MPU6050
+	if(device == 0){
+
+		//clear flags
+		I2C4_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
+
+		//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
+		I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+		//set number of bytes, START, write mode, and target address
+		I2C4_CR2 = ((2 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
+
+		I2C4_CR2 |= (1 << 13); //enable start bit
+
+		while(!I2C4_TxIsEmpty()){
+				//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+				if(I2C4_NackFlagDetected()){
+
+					//generate a stop to end the transmission early
+					I2C4_CR2 = (1 << 14);
+
+					//clear nack flag
+					I2C4_ICR = (1 << 4);
+
+					return 0;
+				}
+		} //wait for transmit data register is empty
+
+		I2C4_TXDR = targetRegister; //Address of power management 1 register
+
+		while(!I2C4_TxIsEmpty()){
+				//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+				if(I2C4_NackFlagDetected()){
+
+					//generate a stop to end the transmission early
+					I2C4_CR2 = (1 << 14);
+
+					//clear nack flag
+					I2C4_ICR = (1 << 4);
+
+					return 0;
+				}
+		} //wait for transmit data register is empty
+		I2C4_TXDR = (uint32_t)(data); //send generic data
+
+
+
+	}
+	//BME280
+	else if (device == 1){
+
+		//clear flags
+		I2C1_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
+
+		//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
+		I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+		//set number of bytes, START, write mode, and target address
+		I2C1_CR2 = ((2 << 16)  | (0 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
+
+		I2C1_CR2 |= (1 << 13); //enable start bit
+
+		while(!I2C1_TxIsEmpty()){
+				//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+				if(I2C1_NackFlagDetected()){
+
+					//generate a stop to end the transmission early
+					I2C1_CR2 = (1 << 14);
+
+					//clear nack flag
+					I2C1_ICR = (1 << 4);
+
+					return 0;
+				}
+		} //wait for transmit data register is empty
+
+		I2C1_TXDR = targetRegister; //Address of power management 1 register
+
+		while(!I2C1_TxIsEmpty()){
+				//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+				if(I2C1_NackFlagDetected()){
+
+					//generate a stop to end the transmission early
+					I2C1_CR2 = (1 << 14);
+
+					//clear nack flag
+					I2C1_ICR = (1 << 4);
+
+					return 0;
+				}
+		} //wait for transmit data register is empty
+		I2C1_TXDR = (uint32_t)(data); //turn off SLEEP at bit 6, set CLKSEL to mode 1 at bit 2:0
+
+
+	}
+	return 1; //0 if fail
+}
+
+
 //we will read the WHOAMI address on the BME280
 //slave address for BME is 0x76, WHOAMI = 0x68
 uint32_t bmeTest(){

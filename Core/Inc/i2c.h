@@ -14,8 +14,11 @@
 #include <stdio.h>
 
 void I2C_Configuration();
+uint32_t I2C_read(uint8_t slaveAddress, uint8_t targetRegister, int device);
+int I2C_write(uint8_t data, int device, uint8_t targetRegister);
 uint32_t bmeTest();
 uint32_t mpuTest();
+void mpuSetup();
 void toggleDisplay();
 void displayOLEDDMAConfig(uint8_t numberOfBytes);
 void sendOLEDCommand(uint8_t cmd);
