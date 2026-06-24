@@ -47,7 +47,7 @@ Core/Src/stm32g4xx_it.o: ../Core/Src/stm32g4xx_it.c ../Core/Inc/main.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/timers.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/list.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/semphr.h \
- D:/stm32workspaces/blink/freeRTOSIncludes/queue.h \
+ D:/stm32workspaces/blink/freeRTOSIncludes/queue.h ../Core/Inc/mpu6050.h \
  ../Core/Inc/stm32g4xx_it.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
@@ -102,4 +102,5 @@ D:/stm32workspaces/blink/freeRTOSIncludes/timers.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/list.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/semphr.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/queue.h:
+../Core/Inc/mpu6050.h:
 ../Core/Inc/stm32g4xx_it.h:

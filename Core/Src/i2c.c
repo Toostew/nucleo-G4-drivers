@@ -316,7 +316,7 @@ int I2C_write(uint8_t data, int device, uint8_t targetRegister){
 		I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
 
 		//set number of bytes, START, write mode, and target address
-		I2C4_CR2 = ((2 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
+		I2C4_CR2 = ((1 << 25) | (2 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
 
 		I2C4_CR2 |= (1 << 13); //enable start bit
 
@@ -350,7 +350,7 @@ int I2C_write(uint8_t data, int device, uint8_t targetRegister){
 				}
 		} //wait for transmit data register is empty
 		I2C4_TXDR = (uint32_t)(data); //send generic data
-
+		while(!I2C4_StopFlagDetected());
 
 
 	}
@@ -474,6 +474,7 @@ uint32_t mpuTest(){
 //initial setup for the MPU6050, including wake up, init and such
 //the register order is power > config(gyro/accel) > read data registers
 //RUN THIS AFTER i2C INIT BUT BEFORE ACTUALLY USING I2C
+//apparently we dont even need this
 void mpuSetup(){
 	//turn on the MPU by setting the SLEEP register to 0 at 0x6B
 	//this function sends wake command, and sets gyro config

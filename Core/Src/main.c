@@ -117,13 +117,7 @@ int main(void)
   }
 
 
-  xTaskCreate(
-  			  testTask, //the function that implements this task
-  			  "test_task", //the name of this task
-  			  128, // stack depth, or size of stack in words, so 128 x 4 bytes per word, that's 512 bytes
-  			  NULL, //task parameters, null means this task doesnt need anymore outside data
-  			  1, //task priority, higher priority will allow it to cut in line for CPU time and maintain it
-  			  NULL); //reference handle
+
 
   xTaskCreate(
 		  	  testTaskTwo, //the function that implements this task
@@ -135,8 +129,8 @@ int main(void)
 
   I2C_Configuration();
   uartPinConfig();
-  rtos_task_setup();
   pinConfig();
+
 
 
   //when this is called the scheduler officially takes over. Ideally nothing past this point gets run
@@ -151,7 +145,7 @@ int main(void)
 void testTask(void * pvParameters){
 	//same as while(1)
 	for(;;){
-		print_hex(bmeTest());
+		print_hex(mpuTest());
 		vTaskDelay(1000); //
 	}
 
@@ -159,9 +153,17 @@ void testTask(void * pvParameters){
 
 //ping MPU6050 once every second, should return 0x68 from 0x75 register at slave address 0x68
 void testTaskTwo(void * pvParameters){
-
+	char tempStr[17];
+	Sensor_Data temp;
 	for(;;){
-		print_hex(mpuTest());
+		temp = MPU_Measure_Gyro();
+		snprintf(tempStr, sizeof(tempStr), "%" PRId16, temp.X_data);
+		UARTSendString(tempStr);
+		snprintf(tempStr, sizeof(tempStr), "%" PRId16, temp.Y_data);
+		UARTSendString(tempStr);
+		snprintf(tempStr, sizeof(tempStr), "%" PRId16, temp.Z_data);
+		UARTSendString(tempStr);
+
 		vTaskDelay(1000);
 	}
 }

@@ -42,6 +42,8 @@ void testTaskTwo(void * pvParameters);
 #include "dmaEx.h"
 #include <freeRTOSQueueTest.h>
 #include "freeRTOSSemaphoreTest.h"
+#include "mpu6050.h"
+#include <inttypes.h> // Provides the PRIu16 macro
 
 
 //FreeRTOS specific

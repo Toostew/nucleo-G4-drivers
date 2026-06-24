@@ -6,6 +6,7 @@
 "./Core/Src/i2c.o"
 "./Core/Src/list.o"
 "./Core/Src/main.o"
+"./Core/Src/mpu6050.o"
 "./Core/Src/port.o"
 "./Core/Src/queue.o"
 "./Core/Src/spiEx.o"

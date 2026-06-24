@@ -1,6 +1,6 @@
 ../Core/Src/i2c.c:66:6:I2C_Configuration	1
 ../Core/Src/i2c.c:177:10:I2C_read	13
-../Core/Src/i2c.c:306:5:I2C_write	11
+../Core/Src/i2c.c:306:5:I2C_write	12
 ../Core/Src/i2c.c:410:10:bmeTest	6
 ../Core/Src/i2c.c:468:10:mpuTest	1
 ../Core/Src/i2c.c:477:6:mpuSetup	1
