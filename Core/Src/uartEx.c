@@ -149,9 +149,12 @@ void UARTSendString(char* str) {
 
 void print_hex(uint32_t num) {
     char hex_chars[] = "0123456789ABCDEF";
-    UARTSendString("0x");
+    UARTSendChar('0');
+    UARTSendChar('x');
     for (int i = 28; i >= 0; i -= 4) {
         UARTSendChar(hex_chars[(num >> i) & 0xF]);
     }
+    UARTSendChar('\n'); //\n for a new line, but doesn't reset to far left of terminal
+    UARTSendChar('\r'); //\r moves cursor to far left
 }
 
