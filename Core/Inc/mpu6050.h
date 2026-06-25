@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+
+//this is incomplete since it ONLY measures axis data for the gyro, there's still the accelorometer
 typedef struct{
 	int16_t X_data;
 	int16_t Y_data;

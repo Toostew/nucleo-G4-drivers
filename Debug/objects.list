@@ -1,3 +1,4 @@
+"./Core/Src/BME280.o"
 "./Core/Src/dmaEx.o"
 "./Core/Src/driverEx.o"
 "./Core/Src/freeRTOSQueueTest.o"
