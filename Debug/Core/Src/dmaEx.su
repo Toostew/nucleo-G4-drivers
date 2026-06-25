@@ -1,6 +1,4 @@
-../Core/Src/dmaEx.c:72:6:dmaSetupSensorArray	24	static
-../Core/Src/dmaEx.c:116:6:setupMPU_6050	4	static
-../Core/Src/dmaEx.c:122:6:testMPU_6050	4	static
-../Core/Src/dmaEx.c:132:6:transmitI2C	4	static
-../Core/Src/dmaEx.c:148:6:dmaSetupOLED	4	static
-../Core/Src/dmaEx.c:174:6:transmitOLED	16	static
+../Core/Src/dmaEx.c:81:6:dmaSetupSensorArray	24	static
+../Core/Src/dmaEx.c:131:6:I2C_DMA_BurstRead	24	static
+../Core/Src/dmaEx.c:282:6:dmaSetupOLED	4	static
+../Core/Src/dmaEx.c:308:6:transmitOLED	16	static

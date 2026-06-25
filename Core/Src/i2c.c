@@ -309,16 +309,22 @@ int I2C_write(uint8_t data, int device, uint8_t targetRegister){
 	//MPU6050
 	if(device == 0){
 
+		//disable I2C4 with pe bit
+		I2C4_CR1 &= ~(1 << 0);
+
 		//clear flags
 		I2C4_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
 
-		//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
+		//clear AUTOEND, NBYTES, STOP, START, ADD10, transfer  direction
 		I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
 
-		//set number of bytes, START, write mode, and target address
+		//set AUTOEND, number of bytes, write mode(transfer direction), and target address
 		I2C4_CR2 = ((1 << 25) | (2 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
 
-		I2C4_CR2 |= (1 << 13); //enable start bit
+		//enable I2C4 with PE bit = 1
+		I2C4_CR1 |= (1 << 0); //Ideally, we "switch off" I2C4 before we run it.
+
+		I2C4_CR2 |= (1 << 13); //enable start bit, this actually begins the I2C transaction
 
 		while(!I2C4_TxIsEmpty()){
 				//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
@@ -357,6 +363,10 @@ int I2C_write(uint8_t data, int device, uint8_t targetRegister){
 	//BME280
 	else if (device == 1){
 
+		//disable I2C1
+		I2C1_CR1 &= ~(1 << 0);
+
+
 		//clear flags
 		I2C1_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
 
@@ -365,6 +375,9 @@ int I2C_write(uint8_t data, int device, uint8_t targetRegister){
 
 		//set number of bytes, START, write mode, and target address
 		I2C1_CR2 = ((2 << 16)  | (0 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
+
+		//disable I2C4
+		I2C1_CR1 |= (1 << 0);
 
 		I2C1_CR2 |= (1 << 13); //enable start bit
 
@@ -398,7 +411,7 @@ int I2C_write(uint8_t data, int device, uint8_t targetRegister){
 				}
 		} //wait for transmit data register is empty
 		I2C1_TXDR = (uint32_t)(data); //turn off SLEEP at bit 6, set CLKSEL to mode 1 at bit 2:0
-
+		while(!I2C1_StopFlagDetected());
 
 	}
 	return 1; //1 if works

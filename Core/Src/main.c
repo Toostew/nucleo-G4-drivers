@@ -130,7 +130,7 @@ int main(void)
   I2C_Configuration();
   uartPinConfig();
   pinConfig();
-
+  mpuSetup();
 
 
   //when this is called the scheduler officially takes over. Ideally nothing past this point gets run
@@ -138,7 +138,7 @@ int main(void)
 
   while (1); // this doesnt actually run
 
-  /* USER CODE END 3 */
+
 }
 
 //ping BME280 once every second, should return 0x60 from 0xD0 register at slave address 0x76

@@ -47,6 +47,9 @@
 #define DMAMUX_C2CR			(*((volatile uint32_t *)(DMAMUX_BASE_ADDR + (0x04 * 2)))) //DMA1 channel 3
 #define DMAMUX_C3CR			(*((volatile uint32_t *)(DMAMUX_BASE_ADDR + (0x04 * 3)))) //DMA1 channel 4
 
+#define DMA_ISR				(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x00)))
+#define DMA_IFCR			(*((volatile uint32_t *)(DMA1_BASE_ADDR + 0x04)))
+
 
 //memory address without dereferencing
 //deprecated, old define we wont use
@@ -56,13 +59,19 @@
 
 #define I2C1_TXDR			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x28UL)))
 #define I2C1_RXDR			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x24UL)))
+#define I2C1_CR1			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x00UL)))
 #define I2C1_CR2			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x04UL)))
+#define I2C1_ICR			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x1CUL)))
+
 
 #define I2C4_TXDR			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x28UL)))
 #define I2C4_RXDR			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x24UL)))
+#define I2C4_CR1			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x00UL)))
 #define I2C4_CR2			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x04UL)))
+#define I2C4_ICR			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x1CUL)))
 
-
+#define MPU6050_SLAVE_ADDR	0x68
+#define BME280_SLAVE_ADDR	0x76
 
 //This is the DMA setup for BME280 and MPU6050
 //we need 2 different channels for the 2 I2C devices, in this case DMA1 Channel 1 and 2
@@ -100,6 +109,7 @@ void dmaSetupSensorArray(uint32_t DMA1_MemoryBuffer, uint32_t DMA2_MemoryBuffer,
 	DMA_CMAR4 = (DMA4_MemoryBuffer);
 
 	//CPAR setup, for I2C RX and TX
+	//think of CPAR like, the buffer we put the data to send or receive
 	DMA_CPAR1 = (uint32_t)(I2C1_RXDR);
 	DMA_CPAR2 = (uint32_t)(I2C1_TXDR);
 	DMA_CPAR3 = (uint32_t)(I2C4_RXDR);
@@ -111,27 +121,151 @@ void dmaSetupSensorArray(uint32_t DMA1_MemoryBuffer, uint32_t DMA2_MemoryBuffer,
 	DMA_CCR3 = ((1 << 7) | (0 << 4)); //I2C4 rx
 	DMA_CCR4 = ((1 << 7) | (1 << 4)); //I2C4 tx
 
-}
 
-void setupMPU_6050(){
-
-}
-
-
-
-void testMPU_6050(){
-
+	//notice we dont turn it on yet
 }
 
 
+//this is for burst reading
+//numberOfBytes does not include the first write
+void I2C_DMA_BurstRead(int device, int numberOfBytes, uint8_t targetRegister){
+
+	//MPU6050, i2C4, DMA3(I2C4 RX)
+	if(device == 0){
+	DMA_CCR3 &= ~(1 << 0); //make sure the channel is disabled
+	//I2C4_CR1 &= ~(1 << 0); //disable the I2C4; it is not advised to do this frequently, this resets the hardware state
+	//CPAR already set, location of peripheral exit/entry address
+	//CMAR already set, location of memory buffer to receive/transmit
+
+	//clear old ISR flags
+	DMA_IFCR |= (0b1111 << 8); //clear all of channel 3's flags
+
+
+	DMA_CNDTR3 = 0x00000000; //reset value to null
+	DMA_CNDTR3 = (uint32_t)numberOfBytes; //set to number of bytes
+
+	DMA_CCR3 |= (1 << 0); //turn it back on
+
+	//disable DMA reception on I2C4, this first part is not using DMA
+	I2C4_CR1 &= ~(1 << 15);
+
+	//clear AUTOEND, NBYTES, STOP, START, ADD10, transfer  direction
+	I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+	//set  number of bytes, write mode(transfer direction), and target address
+	//notice how we do NOT include AUTOEND? this is because generating a stop condition will halt communication completely
+	//for a burst read, we need to perform repeated starts, which are consecutive start conditions
+	I2C4_CR2 = ((1 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
+
+	//enable I2C4 with PE bit = 1
+	//I2C4_CR1 |= (1 << 0); stopping the I2C peripheral resets the hardware, use strategically
+
+	I2C4_CR2 |= (1 << 13); //enable start bit
+
+	while(!I2C4_TxIsEmpty()){
+			//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+			if(I2C4_NackFlagDetected()){
+
+				//generate a stop to end the transmission early
+				I2C4_CR2 = (1 << 14);
+
+				//clear nack flag
+				I2C4_ICR = (1 << 4);
+
+				return; //terminate early
+			}
+	} //wait for transmit data register is empty
+
+	I2C4_TXDR = targetRegister; //Address of power management 1 register
+
+	//end of WRITE phase
+	while(!I2C4_TransferComplete());
+
+
+	//START of READ phase, this is where we do the DMA shuffling
+	//clear AUTOEND, NBYTES, STOP, START, ADD10, transfer  direction
+	I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+	//set AUTOEND, number of bytes, read mode(transfer direction), and target address
+	I2C4_CR2 = ((1 << 25) | (numberOfBytes << 16)  | (1 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
+
+	//enable DMA reception on I2C4, this second burst read part will use DMA
+	I2C4_CR1 |= (1 << 15);
 
 
 
-
-//transmit based on CMAR location
-void transmitI2C(){
+	I2C4_CR2 |= (1 << 13); //enable start bit REMEMBER:
 
 
+	}
+	//BME280, I2C1, DMA1(I2C1 RX)
+	else if(device == 1){
+		DMA_CCR1 &= ~(1 << 0); //make sure the channel is disabled
+		//I2C4_CR1 &= ~(1 << 0); //disable the I2C1; it is not advised to do this frequently, this resets the hardware state
+		//CPAR already set, location of peripheral exit/entry address
+		//CMAR already set, location of memory buffer to receive/transmit
+
+		//clear old ISR flags
+		DMA_IFCR |= (0b1111 << 0); //clear all of channel 3's flags
+
+
+		DMA_CNDTR1 = 0x00000000; //reset value to null
+		DMA_CNDTR1 = (uint32_t)numberOfBytes; //set to number of bytes
+
+		DMA_CCR1 |= (1 << 0); //turn it back on
+
+		//disable DMA reception on I2C1, this first part is not using DMA
+		I2C1_CR1 &= ~(1 << 15);
+
+		//clear AUTOEND, NBYTES, STOP, START, ADD10, transfer  direction
+		I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+		//set  number of bytes, write mode(transfer direction), and target address
+		//notice how we do NOT include AUTOEND? this is because generating a stop condition will halt communication completely
+		//for a burst read, we need to perform repeated starts, which are consecutive start conditions
+		I2C1_CR2 = ((1 << 16)  | (0 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
+
+		//enable I2C4 with PE bit = 1
+		//I2C1_CR1 |= (1 << 0); stopping the I2C peripheral resets the hardware, use strategically
+
+		I2C1_CR2 |= (1 << 13); //enable start bit
+
+		while(!I2C1_TxIsEmpty()){
+				//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
+				if(I2C1_NackFlagDetected()){
+
+					//generate a stop to end the transmission early
+					I2C1_CR2 = (1 << 14);
+
+					//clear nack flag
+					I2C1_ICR = (1 << 4);
+
+					return; //terminate early
+				}
+		} //wait for transmit data register is empty
+
+		I2C1_TXDR = targetRegister; //Address of power management 1 register
+
+		//end of WRITE phase
+		while(!I2C1_TransferComplete());
+
+
+		//START of READ phase, this is where we do the DMA shuffling
+		//clear AUTOEND, NBYTES, STOP, START, ADD10, transfer  direction
+		I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+
+		//set AUTOEND, number of bytes, read mode(transfer direction), and target address
+		I2C1_CR2 = ((1 << 25) | (numberOfBytes << 16)  | (1 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
+
+		//enable DMA reception on I2C4, this second burst read part will use DMA
+		I2C1_CR1 |= (1 << 15);
+
+		I2C1_CR2 |= (1 << 13); //enable start bit REMEMBER:
+
+		//I2C bus now operated entirely by DMA,
+
+
+	}
 
 }
 
