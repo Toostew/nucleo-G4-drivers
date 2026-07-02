@@ -129,6 +129,14 @@ void dmaSetupSensorArray(uint32_t DMA1_MemoryBuffer, uint32_t DMA2_MemoryBuffer,
 	//notice we dont turn it on yet
 }
 
+//This function uses DMA and Interrupts, a step up from the polling based approach in the other function
+void I2C_DMA_InterruptBurstRead(int device, int numberOfBytes, uint8_t targetRegister){
+
+}
+
+
+
+
 
 //this is for burst reading
 //numberOfBytes does not include the first write

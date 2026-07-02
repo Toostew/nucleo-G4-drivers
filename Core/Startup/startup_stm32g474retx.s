@@ -381,7 +381,7 @@ g_pfnVectors:
 	.thumb_set TIM4_IRQHandler,Default_Handler
 
 	.weak	I2C1_EV_IRQHandler
-	.thumb_set I2C1_EV_IRQHandler,Default_Handler
+	.thumb_set I2C1_EV_IRQHandler,Default_Handler //use this one for BME280
 
 	.weak	I2C1_ER_IRQHandler
 	.thumb_set I2C1_ER_IRQHandler,Default_Handler

@@ -5,6 +5,7 @@
 "./Core/Src/freeRTOSSemaphoreTest.o"
 "./Core/Src/heap_4.o"
 "./Core/Src/i2c.o"
+"./Core/Src/interrupt.o"
 "./Core/Src/list.o"
 "./Core/Src/main.o"
 "./Core/Src/mpu6050.o"
