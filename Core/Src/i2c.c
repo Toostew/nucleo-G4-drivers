@@ -69,7 +69,7 @@ void I2C_Configuration(){
 	//enable clocks
 	RCC_APB1ENR |= (1 << 21);
 	RCC_APB1ENR2 |= (1 << 1); //turn on I2C4 DUMBASS!!!!!!!!!!!!!!!!!
-	RCC_AHB2ENR |= (1 << 1);
+	RCC_AHB2ENR |= ((1 << 1) | (1 << 2)); //TURN ON Ports B AND C!!! IDIOTAAAAAAAAAAAAAA
 
 	//change source clock for I2C1 to use HSI, 16 MHZ. makes my life easier
 	RCC_CCIPR &= ~(3 << 12);
@@ -147,8 +147,7 @@ void I2C_Configuration(){
 	//target is 100KHz
 	I2C1_TIMINGR |= ((0x3 << 28) | (0x13 << 0) | (0xF << 8) | (0x4 << 20) | (0x2 << 16));
 
-	//TXDMAEN enabled, turn on DMA transmussuib requests
-	I2C1_CR1 |= (1 << 14); // disable if not using DMA
+
 
 	//enable I2C
 	I2C1_CR1 |= (1 << 0);
@@ -164,8 +163,7 @@ void I2C_Configuration(){
 	//we copy exactly with I2C1 since we target 100KHz
 	I2C4_TIMINGR |= ((0x3 << 28) | (0x13 << 0) | (0xF << 8) | (0x4 << 20) | (0x2 << 16));
 
-	//TXDMAEN enabled, turn on DMA transmussuib requests
-	I2C4_CR1 |= (1 << 14); // disable if not using DMA
+
 
 	//enable I2C
 	I2C4_CR1 |= (1 << 0);
@@ -180,7 +178,7 @@ uint32_t I2C_read(uint8_t targetRegister, int device){
 	//MPU6050
 	if(device == 0){
 		//clear flags
-		I2C4_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
+		I2C4_ICR = (1 << 5) | (1 << 4) | (1 << 8);
 
 		//first message for read
 		//CR2 setup
@@ -215,19 +213,19 @@ uint32_t I2C_read(uint8_t targetRegister, int device){
 		//set start bit LAST
 		I2C4_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
 
-		//bit 10 = 1, read operation.
-		I2C4_CR2 = ((1 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
+		//bit 10 = 1, read operation. (bit 25: no AUTOEND, we will manually generate stop AFTER reading RX)
+		I2C4_CR2 = ((0 << 25) | (1 << 16) | (0 << 11) | (1 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
 
 		I2C4_CR2 |= (1 << 13); //enable start bit
 
-		while(!I2C4_RXNotEmpty()); //hold until RX is empty
+		while(!(I2C4_ISR & (1 << 2))); //hold until RX is not empty
 		uint32_t data = I2C4_RXDR; //the register is already 32 bits no need to type cast
-
+		I2C4_CR2 |= (1 << 14);
 
 		//use stop flags as more like milestones and not actual conditionals to dictate logics directly
 		while(!I2C4_StopFlagDetected());
 
-		I2C4_ICR |= (1 << 5);
+		I2C4_ICR = (1 << 5);
 
 
 		return data;
@@ -238,7 +236,7 @@ uint32_t I2C_read(uint8_t targetRegister, int device){
 	else if(device == 1){
 
 		//clear Bus Error, NACK, STOP flag registers, these are event flags and are sticky, need to reset manually
-		I2C1_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
+		I2C1_ICR = (1 << 5) | (1 << 4) | (1 << 8);
 
 
 		//first message for read
@@ -285,7 +283,7 @@ uint32_t I2C_read(uint8_t targetRegister, int device){
 		//use stop flags as more like milestones and not actual conditionals to dictate logics directly
 		while(!I2C1_StopFlagDetected());
 
-		I2C1_ICR |= (1 << 5);
+		I2C1_ICR = (1 << 5);
 
 
 		return data;
@@ -310,7 +308,7 @@ int I2C_write(uint8_t data, int device, uint8_t targetRegister){
 	if(device == 0){
 
 		//disable I2C4 with pe bit
-		I2C4_CR1 &= ~(1 << 0);
+		//I2C4_CR1 &= ~(1 << 0);
 
 		//clear flags
 		I2C4_ICR |= (1 << 5) | (1 << 4) | (1 << 8);
@@ -322,13 +320,13 @@ int I2C_write(uint8_t data, int device, uint8_t targetRegister){
 		I2C4_CR2 = ((1 << 25) | (2 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
 
 		//enable I2C4 with PE bit = 1
-		I2C4_CR1 |= (1 << 0); //Ideally, we "switch off" I2C4 before we run it.
+		//I2C4_CR1 |= (1 << 0); //Ideally, we "switch off" I2C4 before we run it.
 
 		I2C4_CR2 |= (1 << 13); //enable start bit, this actually begins the I2C transaction
 
 		while(!I2C4_TxIsEmpty()){
 				//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
-				if(I2C4_NackFlagDetected()){
+				if(I2C4_ISR & (1 << 4)){
 
 					//generate a stop to end the transmission early
 					I2C4_CR2 = (1 << 14);
@@ -342,9 +340,9 @@ int I2C_write(uint8_t data, int device, uint8_t targetRegister){
 
 		I2C4_TXDR = targetRegister; //Address of power management 1 register
 
-		while(!I2C4_TxIsEmpty()){
+		while(!(I2C4_ISR & (1 << 1))){
 				//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
-				if(I2C4_NackFlagDetected()){
+				if(I2C4_ISR & (1 << 4)){
 
 					//generate a stop to end the transmission early
 					I2C4_CR2 = (1 << 14);
@@ -358,13 +356,15 @@ int I2C_write(uint8_t data, int device, uint8_t targetRegister){
 		I2C4_TXDR = (uint32_t)(data); //send generic data
 		while(!I2C4_StopFlagDetected());
 
+		I2C4_ICR |= (1 << 5); //clear the STOPF flag
+
 
 	}
 	//BME280
 	else if (device == 1){
 
 		//disable I2C1
-		I2C1_CR1 &= ~(1 << 0);
+		//I2C1_CR1 &= ~(1 << 0);
 
 
 		//clear flags
@@ -373,11 +373,11 @@ int I2C_write(uint8_t data, int device, uint8_t targetRegister){
 		//clear AUTOEND, NBYTES, STOP, START, ADD10, RD_WRN, and SADD
 		I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
 
-		//set number of bytes, START, write mode, and target address
-		I2C1_CR2 = ((2 << 16)  | (0 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
+		//set AUTOEND number of bytes, START, write mode, and target address
+		I2C1_CR2 = ((1 << 25) | (2 << 16)  | (0 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
 
-		//disable I2C4
-		I2C1_CR1 |= (1 << 0);
+		//reenable I2C4
+		//I2C1_CR1 |= (1 << 0);
 
 		I2C1_CR2 |= (1 << 13); //enable start bit
 
@@ -436,7 +436,7 @@ uint32_t bmeTest(){
 
 	I2C1_CR2 |= (1 << 13); //enable start bit
 
-	while(!I2C1_TxIsEmpty()){
+	while(!(I2C4_ISR & (1 << 1))){
 		//during transmission there could be a chance nothing comes back, NACK is flagged if nothing responds
 		if(I2C1_NackFlagDetected()){
 
@@ -680,7 +680,8 @@ int I2C4_NackFlagDetected(){
 	return 0;
 }
 
-//RX not empty; 1 for empty, 0 for filled
+//RX not empty; 1 if not empty, 0 for empty. set when received data is copied into I2C_RXDR
+//cleared by hardware when I2C4_RXDR is read
 int I2C4_RXNotEmpty(){
 	if(I2C4_ISR & (1 << 2)){
 		return 1;

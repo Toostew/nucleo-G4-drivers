@@ -1,1 +1,1 @@
-../Core/Src/BME280.c:22:6:BME_I2C_Setup	4	static
+../Core/Src/BME280.c:91:6:BME_I2C_Setup	8	static

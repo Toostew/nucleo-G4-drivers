@@ -8,10 +8,29 @@
 #ifndef INC_BME280_H_
 #define INC_BME280_H_
 
+#define hum_lsb		0xFE
+#define hum_msb		0xFD
+#define temp_xlsb	0xFC
+#define temp_lsb	0xFB
+#define temp_msb 	0xFA
+#define press_xlsb	0xF9
+#define press_lsb 	0xF8
+#define press_msb	0xF7
+#define config		0xF5
+#define ctrl_meas	0xF4
+#define status		0xF3
+#define ctrl_hum	0xF2
+#define reset		0xE0
+#define id			0xD0
+
+
+
 #include <stdint.h> //<filename> usually for standard library, in the compile path
 #include <stdio.h>
 #include "i2c.h" //
-
+#include "dmaEx.h"
+#include "uartEx.h"
+#include "main.h"
 
 typedef struct {
 	uint32_t pres_20b; //20 bit stored in 32 bits
@@ -33,7 +52,7 @@ typedef struct {
 	int16_t 	dig_P6; //short
 	int16_t 	dig_P7; //short
 	int16_t 	dig_P8; //short
-	int16_t 	dig_P9; //0x9,  short
+	int16_t 	dig_P9; //0x9F,  short
 } Compensation_Constants_High;
 
 typedef struct {
@@ -48,6 +67,14 @@ typedef struct {
 	int8_t		dig_H6; //0xE7,  char
 } Compensation_Constants_Low;
 
+typedef struct {
+	Compensation_Constants_High high;
+	Compensation_Constants_A1 a1;
+	Compensation_Constants_Low low;
+} Compensation_Constants;
+
+
+void BME_I2C_Setup();
 
 
 

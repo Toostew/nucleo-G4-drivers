@@ -44,8 +44,9 @@ Core/Src/freeRTOSSemaphoreTest.o: ../Core/Src/freeRTOSSemaphoreTest.c \
  D:/stm32workspaces/blink/freeRTOSIncludes/list.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/queue.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/task.h ../Core/Inc/dmaEx.h \
- ../Core/Inc/freeRTOSQueueTest.h \
- D:/stm32workspaces/blink/freeRTOSIncludes/timers.h \
+ ../Core/Inc/main.h ../Core/Inc/freeRTOSQueueTest.h \
+ ../Core/Inc/freeRTOSSemaphoreTest.h ../Core/Inc/mpu6050.h \
+ ../Core/Inc/BME280.h D:/stm32workspaces/blink/freeRTOSIncludes/timers.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/list.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/semphr.h \
  D:/stm32workspaces/blink/freeRTOSIncludes/queue.h
@@ -96,7 +97,11 @@ D:/stm32workspaces/blink/freeRTOSIncludes/list.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/queue.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/task.h:
 ../Core/Inc/dmaEx.h:
+../Core/Inc/main.h:
 ../Core/Inc/freeRTOSQueueTest.h:
+../Core/Inc/freeRTOSSemaphoreTest.h:
+../Core/Inc/mpu6050.h:
+../Core/Inc/BME280.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/timers.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/list.h:
 D:/stm32workspaces/blink/freeRTOSIncludes/semphr.h:

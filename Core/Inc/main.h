@@ -26,16 +26,11 @@
 extern "C" {
 #endif
 
-int main();
-void testTask(void *pvParameters);
-void testTaskTwo(void * pvParameters);
-
-
-/* Includes ------------------------------------------------------------------*/
 #include "stm32g4xx_hal.h"
 
 #include "stm32g4xx_nucleo.h"
 #include <stdio.h>
+#include <stdint.h>
 
 #include "i2c.h"
 #include "uartEx.h"
@@ -43,6 +38,9 @@ void testTaskTwo(void * pvParameters);
 #include <freeRTOSQueueTest.h>
 #include "freeRTOSSemaphoreTest.h"
 #include "mpu6050.h"
+#include "BME280.h"
+
+
 #include <inttypes.h> // Provides the PRIu16 macro
 
 
@@ -51,6 +49,19 @@ void testTaskTwo(void * pvParameters);
 #include "task.h"
 #include "timers.h"
 #include "queue.h"
+
+
+
+
+
+
+int main();
+void testTask(void *pvParameters);
+void testTaskTwo(void * pvParameters);
+void Simple_Delay_MS(uint32_t ms);
+
+
+/* Includes ------------------------------------------------------------------*/
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */

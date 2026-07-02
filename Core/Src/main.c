@@ -119,24 +119,24 @@ int main(void)
 
 
 
-  xTaskCreate(
-		  	  testTaskTwo, //the function that implements this task
-			  "test_task_two", //the name of this task
-			  128, // stack depth, or size of stack in words, so 128 x 4 bytes per word, that's 512 bytes
-			  NULL, //task parameters, null means this task doesnt need anymore outside data
-			  1, //task priority, higher priority will allow it to cut in line for CPU time and maintain it
-    		  NULL); //reference handle
+
 
   I2C_Configuration();
-  uartPinConfig();
-  pinConfig();
-  mpuSetup();
+  //uartPinConfig();
+  BME_I2C_Setup();
+  //pinConfig();
+
+
+
+
+
+
 
 
   //when this is called the scheduler officially takes over. Ideally nothing past this point gets run
-  vTaskStartScheduler();
+ // vTaskStartScheduler();
 
-  while (1); // this doesnt actually run
+  //while (1); // this doesnt actually run
 
 
 }
@@ -166,6 +166,17 @@ void testTaskTwo(void * pvParameters){
 
 		vTaskDelay(1000);
 	}
+}
+
+void Simple_Delay_MS(volatile uint32_t ms) {
+    // Note: The STM32G4 can run up to 170MHz.
+    // This inner loop count (~25000) will give you roughly 1ms if running at high speeds.
+    // Adjust it up or down if your delay feels too fast or slow.
+    while (ms--) {
+        for (volatile uint32_t i = 0; i < 25000; i++) {
+            __NOP(); // Assembly "No Operation" instruction to guarantee a clock cycle pass
+        }
+    }
 }
 
 /**

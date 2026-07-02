@@ -61,7 +61,8 @@
 #define I2C1_RXDR			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x24UL)))
 #define I2C1_CR1			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x00UL)))
 #define I2C1_CR2			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x04UL)))
-#define I2C1_ICR			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x1CUL)))
+#define I2C1_ISR			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x18UL)))
+#define I2C1_ICR			(*((volatile uint32_t *)(I2C1_BASE_ADDR + 0x1CUL)))
 
 
 #define I2C4_TXDR			(*((volatile uint32_t *)(I2C4_BASE_ADDR + 0x28UL)))
@@ -85,6 +86,9 @@ void dmaSetupSensorArray(uint32_t DMA1_MemoryBuffer, uint32_t DMA2_MemoryBuffer,
 	//RCC, enable DMA1 and DMAMUX1 (despite the name there is only 1 DMAMUX)
 	RCC->AHB1ENR |= ((1 << 0) | (1 << 2));
 
+	//we put a dummy read here BECAUSE when we enable AHB1 for DMA, there's actually a short delay before it can respond properly
+	//we put the dummy read to puropsefully delay to give DMAmux time
+	(void)RCC->AHB1ENR;
 	//DMAMUX setup
 	//DMA channel 1 - 8 is mapped to DMAMUX channel 0 - 7
 	//DMA request IDs can be found at page 420 in RM0440
@@ -110,10 +114,10 @@ void dmaSetupSensorArray(uint32_t DMA1_MemoryBuffer, uint32_t DMA2_MemoryBuffer,
 
 	//CPAR setup, for I2C RX and TX
 	//think of CPAR like, the buffer we put the data to send or receive
-	DMA_CPAR1 = (uint32_t)(I2C1_RXDR);
-	DMA_CPAR2 = (uint32_t)(I2C1_TXDR);
-	DMA_CPAR3 = (uint32_t)(I2C4_RXDR);
-	DMA_CPAR4 = (uint32_t)(I2C4_TXDR);
+	DMA_CPAR1 = (uint32_t)(&I2C1_RXDR);
+	DMA_CPAR2 = (uint32_t)(&I2C1_TXDR);
+	DMA_CPAR3 = (uint32_t)(&I2C4_RXDR);
+	DMA_CPAR4 = (uint32_t)(&I2C4_TXDR);
 
 
 	DMA_CCR1 = ((1 << 7) | (0 << 4)); //I2C1 rx
@@ -155,7 +159,7 @@ void I2C_DMA_BurstRead(int device, int numberOfBytes, uint8_t targetRegister){
 	//set  number of bytes, write mode(transfer direction), and target address
 	//notice how we do NOT include AUTOEND? this is because generating a stop condition will halt communication completely
 	//for a burst read, we need to perform repeated starts, which are consecutive start conditions
-	I2C4_CR2 = ((1 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
+	I2C4_CR2 |= ((1 << 16)  | (0 << 10) | (((uint32_t)(MPU6050_SLAVE_ADDR)) << 1));
 
 	//enable I2C4 with PE bit = 1
 	//I2C4_CR1 |= (1 << 0); stopping the I2C peripheral resets the hardware, use strategically
@@ -178,6 +182,8 @@ void I2C_DMA_BurstRead(int device, int numberOfBytes, uint8_t targetRegister){
 
 	I2C4_TXDR = targetRegister; //Address of power management 1 register
 
+
+
 	//end of WRITE phase
 	while(!I2C4_TransferComplete());
 
@@ -197,13 +203,16 @@ void I2C_DMA_BurstRead(int device, int numberOfBytes, uint8_t targetRegister){
 	I2C4_CR2 |= (1 << 13); //enable start bit REMEMBER:
 
 
+
 	}
 	//BME280, I2C1, DMA1(I2C1 RX)
 	else if(device == 1){
-		DMA_CCR1 &= ~(1 << 0); //make sure the channel is disabled
+		//DMA_CCR1 &= ~(1 << 0); //make sure the channel is disabled
 		//I2C4_CR1 &= ~(1 << 0); //disable the I2C1; it is not advised to do this frequently, this resets the hardware state
 		//CPAR already set, location of peripheral exit/entry address
 		//CMAR already set, location of memory buffer to receive/transmit
+
+		DMA_CCR1 &= ~(1 << 0); //turn off DMA channel 1, Changes to config are not properly reflected
 
 		//clear old ISR flags
 		DMA_IFCR |= (0b1111 << 0); //clear all of channel 3's flags
@@ -212,7 +221,10 @@ void I2C_DMA_BurstRead(int device, int numberOfBytes, uint8_t targetRegister){
 		DMA_CNDTR1 = 0x00000000; //reset value to null
 		DMA_CNDTR1 = (uint32_t)numberOfBytes; //set to number of bytes
 
+
 		DMA_CCR1 |= (1 << 0); //turn it back on
+
+
 
 		//disable DMA reception on I2C1, this first part is not using DMA
 		I2C1_CR1 &= ~(1 << 15);
@@ -246,24 +258,60 @@ void I2C_DMA_BurstRead(int device, int numberOfBytes, uint8_t targetRegister){
 
 		I2C1_TXDR = targetRegister; //Address of power management 1 register
 
+
+
 		//end of WRITE phase
 		while(!I2C1_TransferComplete());
 
 
+
+
 		//START of READ phase, this is where we do the DMA shuffling
 		//clear AUTOEND, NBYTES, STOP, START, ADD10, transfer  direction
-		I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10));
+		I2C1_CR2 &= ~((1 << 25) | (0b11111111 << 16) | (1 << 14) | (1 << 13) | (1 << 11) | (1 << 10) | (0b1111111 << 0));
 
 		//set AUTOEND, number of bytes, read mode(transfer direction), and target address
 		I2C1_CR2 = ((1 << 25) | (numberOfBytes << 16)  | (1 << 10) | (((uint32_t)(BME280_SLAVE_ADDR)) << 1));
 
-		//enable DMA reception on I2C4, this second burst read part will use DMA
+
+		//enable DMA reception on I2C1, this second burst read part will use DMA
 		I2C1_CR1 |= (1 << 15);
 
-		I2C1_CR2 |= (1 << 13); //enable start bit REMEMBER:
+		I2C1_CR2 |= (1 << 13); //enable start bit REMEMBER: this fires the procedure immediately
+
+		//27/6/2026: THIS IS A RACE CONDITION!!!!!!!!!!!!
+		//29/6/2026: Figured it out, it is unsafe to use DMA ISR alone to detect transfers,
+		//should also use I2C transfer detection
 
 		//I2C bus now operated entirely by DMA,
+		//Wait for DMA1 Channel 1 Transfer Complete flag (Bit 1 of DMA_ISR)
+		// 1. Verify Clock/Enable
 
+
+		//while (!(I2C1_ISR & (1 << 5)))
+
+
+
+
+		while (!(DMA_ISR & (1 << 1)));	//contantly check DMA_ISR,
+			//RACE CONDITION
+
+
+		//while(!(I2C1->ISR & (1 << 6)) );
+
+
+		//for (volatile int i = 0; i < 1000; i++);
+
+		I2C1_CR1 &= ~(1 << 15); //disable the DMA receive bit
+
+		//turn off DMA
+		DMA1_Channel1->CCR &= ~(1 << 1);
+
+		// Clear the flag so it's ready for the next burst read
+		DMA_IFCR |= (0b111 << 0);
+
+		//clear I2C STOPF flag
+		I2C1_ICR |= (1 << 5);
 
 	}
 
@@ -271,6 +319,16 @@ void I2C_DMA_BurstRead(int device, int numberOfBytes, uint8_t targetRegister){
 
 
 
+/**
+ * @brief Performs a robust I2C Burst Read using DMA
+ * @param i2c_ptr Pointer to the I2C instance (e.g., I2C1 or I2C4)
+ * @param dma_ch_ptr Pointer to the DMA Channel instance (e.g., DMA1_Channel1)
+ * @param dma_isr_bit Bit position in ISR (e.g., 1 for Channel 1)
+ * @param slave_addr Device address (8-bit)
+ * @param reg_addr Register address to start reading from
+ * @param num_bytes Number of bytes to read
+ * @param rx_buffer Pointer to memory buffer
+ */
 
 
 

@@ -1,4 +1,4 @@
-../Core/Src/dmaEx.c:81:6:dmaSetupSensorArray	1
-../Core/Src/dmaEx.c:131:6:I2C_DMA_BurstRead	9
-../Core/Src/dmaEx.c:282:6:dmaSetupOLED	1
-../Core/Src/dmaEx.c:308:6:transmitOLED	2
+../Core/Src/dmaEx.c:82:6:dmaSetupSensorArray	1
+../Core/Src/dmaEx.c:135:6:I2C_DMA_BurstRead	10
+../Core/Src/dmaEx.c:340:6:dmaSetupOLED	1
+../Core/Src/dmaEx.c:366:6:transmitOLED	2
